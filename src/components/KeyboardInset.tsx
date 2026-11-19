@@ -22,6 +22,12 @@ export default function KeyboardInset() {
     const root = document.documentElement;
 
     const apply = () => {
+      // Anchor to where the visible area actually ends, rather than measuring
+      // back from the bottom: innerHeight under-reports on iOS once the
+      // keyboard's own toolbar is up, which left the composer behind it.
+      root.style.setProperty('--vvh', `${Math.round(vv.height)}px`);
+      root.style.setProperty('--vvt', `${Math.round(vv.offsetTop)}px`);
+
       const covered = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
       root.style.setProperty('--kb', `${Math.round(covered)}px`);
       // A few pixels of rounding are not a keyboard.
@@ -35,6 +41,8 @@ export default function KeyboardInset() {
       vv.removeEventListener('resize', apply);
       vv.removeEventListener('scroll', apply);
       root.style.removeProperty('--kb');
+      root.style.removeProperty('--vvh');
+      root.style.removeProperty('--vvt');
       delete document.body.dataset.kb;
     };
   }, []);

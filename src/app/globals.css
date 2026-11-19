@@ -173,6 +173,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field label { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
 .field input, .field select {
+  font-size: 16px;
   background: var(--paper-sunk);
   border: 1px solid transparent;
   border-radius: var(--r-sm);
@@ -351,8 +352,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
   display: flex;
   flex-direction: column;
   gap: 4px;
+  justify-content: flex-end;
   padding-bottom: 86px;
-  min-height: calc(100dvh - 320px);
+  min-height: calc(100dvh - 300px);
 }
 
 .chat-day {
@@ -443,7 +445,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   left: 50%;
   transform: translateX(-50%);
   width: min(calc(100% - 32px), 728px);
-  bottom: calc(var(--kb, 0px) + 78px);
+  top: calc(var(--vvt, 0px) + var(--vvh, 100dvh) - 68px - var(--tab-space, 76px));
   z-index: 11;
   display: flex;
   gap: 8px;
@@ -453,15 +455,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
   -webkit-backdrop-filter: saturate(1.6) blur(16px);
   border-radius: 999px;
   box-shadow: var(--lift-2);
-  transition: bottom 0.18s ease-out;
+  transition: top 0.18s ease-out;
 }
 
 /* With the keyboard up the tab bar is unreachable anyway, so it leaves and
    the composer takes its place directly on top of the keyboard. */
-body[data-kb='open'] .composer { bottom: calc(var(--kb, 0px) + 8px); }
+body[data-kb='open'] .composer { --tab-space: 8px; }
 body[data-kb='open'] .tabbar { transform: translateY(115%); }
 .tabbar { transition: transform 0.18s ease-out; }
 .composer input {
+  font-size: 16px;
   flex: 1 1 auto;
   min-width: 0;
   border: none;

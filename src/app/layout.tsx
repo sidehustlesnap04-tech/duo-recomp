@@ -19,6 +19,12 @@ export const viewport: Viewport = {
   themeColor: '#eef0f6',
   width: 'device-width',
   initialScale: 1,
+  // Pinch and double-tap zoom belong in a document, not in an app shell:
+  // a stray pinch left the whole interface scaled with no way back.
+  maximumScale: 1,
+  userScalable: false,
+  // Tells the browser the keyboard should shrink the layout, not cover it.
+  interactiveWidget: 'resizes-content',
   viewportFit: 'cover'
 };
 

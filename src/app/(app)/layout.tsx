@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import TabBar from '@/components/TabBar';
+import LiveRefresh from '@/components/LiveRefresh';
 import { requireSession } from '@/lib/duo';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -19,6 +20,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </header>
         <main className="stack">{children}</main>
       </div>
+      <LiveRefresh duoId={duo.id} />
       <TabBar />
     </div>
   );
