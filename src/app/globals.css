@@ -832,3 +832,62 @@ html[data-intro='on'] body::before {
   padding: var(--s4);
 }
 .nav-row > :nth-child(2) { flex: 1 1 auto; }
+
+/* ---- dark ---------------------------------------------------------------
+   Every surface and ink is a token, so the dark theme is a redefinition
+   rather than a second stylesheet. The two player colours do not change —
+   coral and rose are the identity, and they carry harder on charcoal than
+   they do on paper. What changes is what sits behind them. */
+
+[data-theme='dark'] {
+  --bg: #15161b;
+  --bg-deep: #0f1014;
+  --paper: #1d1f26;
+  --paper-sunk: #24272f;
+
+  --ink: #f1f3f8;
+  --ink-soft: #a6abba;
+  --ink-faint: #717787;
+  --line: #2d313a;
+
+  /* Player surfaces become deep tints of the same hue, not pale washes. */
+  --peach: #40281f;
+  --blush: #3c1f2e;
+  --mint: #1e352c;
+  --lavender: #2a2540;
+  --powder: #1f2c3d;
+  --butter: #3a3119;
+
+  --success: #5fbd8f;
+  --warning: #e2b55c;
+  --danger: #e9735d;
+
+  --lift-1: 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 14px -8px rgba(0, 0, 0, 0.7);
+  --lift-2: 0 2px 4px rgba(0, 0, 0, 0.5), 0 18px 36px -20px rgba(0, 0, 0, 0.9);
+}
+
+[data-theme='dark'] [data-player='fox'] { --player-wash: #2a1c17; }
+[data-theme='dark'] [data-player='rabbit'] { --player-wash: #2a1823; }
+
+/* Surfaces that were translucent white have to flip, or they glow. */
+[data-theme='dark'] .tabbar,
+[data-theme='dark'] .composer {
+  background: rgba(29, 31, 38, 0.9);
+  border-top-color: rgba(45, 49, 58, 0.9);
+}
+[data-theme='dark'] .chat-day { background: rgba(29, 31, 38, 0.8); }
+[data-theme='dark'] .intro-skip { background: rgba(29, 31, 38, 0.8); color: var(--ink-soft); }
+[data-theme='dark'] .bubble { background: var(--paper-sunk); }
+[data-theme='dark'] .btn { background: var(--paper-sunk); border-color: var(--line); }
+[data-theme='dark'] .btn.primary { background: var(--ink); color: #15161b; border-color: var(--ink); }
+[data-theme='dark'] .btn.quiet { background: transparent; }
+[data-theme='dark'] .btn.quiet:hover { background: var(--paper-sunk); }
+[data-theme='dark'] .field input,
+[data-theme='dark'] .field select { background: var(--paper-sunk); color: var(--ink); }
+[data-theme='dark'] .field input:focus,
+[data-theme='dark'] .field select:focus { background: #171a20; }
+[data-theme='dark'] .badge { box-shadow: 0 0 0 2px var(--paper); }
+[data-theme='dark'] .ring-3d::after {
+  box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.1), inset 0 -2px 4px rgba(0, 0, 0, 0.45);
+}
+[data-theme='dark'] .hero { box-shadow: var(--lift-2); }

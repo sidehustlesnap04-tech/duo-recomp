@@ -22,7 +22,7 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
     loadDay(me.user_id, duo.id, duo.starts_on, date),
     loadTasksForDay(duo.id, date),
     supabase.from('daily_scores').select('user_id, points, bonus').eq('duo_id', duo.id).eq('score_date', date),
-    supabase.from('daily_scores').select('user_id, points, bonus').eq('duo_id', duo.id),
+    supabase.from('daily_scores').select('user_id, score_date, points, bonus').eq('duo_id', duo.id),
     // Open shared goals that are due by today. A goal made for today was
     // only visible under More, which is not where anyone looks for it.
     supabase
@@ -48,6 +48,34 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
   const mealsLeft = day.menu.filter((m) => !m.logged).length;
 
   const myTasks = plan.onDay.filter((x) => x.owner_id === null || x.owner_id === me.user_id);
+  // --- consistency ------------------------------------------------------
+  const mineByDate = new Map(
+    ((allScores ?? []) as { user_id: string; score_date: string; points: number; bonus: number }[])
+      .filter((r) => r.user_id === me.user_id)
+      .map((r) => [r.score_date, r.points + r.bonus])
+  );
+
+  const shift = (iso: string, days: number) =>
+    new Date(new Date(iso + 'T12:00:00').getTime() + days * 86400000).toISOString().slice(0, 10);
+
+  // A day counts toward the streak at 70 of 110. Today is allowed to be
+  // unfinished without breaking it — it is not over yet.
+  let streak = 0;
+  for (let i = 0; i < 400; i++) {
+    const v = mineByDate.get(shift(date, -i)) ?? 0;
+    if (i === 0 && v < 70) continue;
+    if (v >= 70) streak++;
+    else break;
+  }
+
+  const weeks = Array.from({ length: 6 }).map((_, i) => {
+    const back = 5 - i;
+    let sum = 0;
+    for (let d = 0; d < 7; d++) sum += mineByDate.get(shift(date, -(back * 7 + d))) ?? 0;
+    return { sum, label: back === 0 ? 'now' : `${back}w` };
+  });
+  const weekBest = Math.max(770, ...weeks.map((w) => w.sum));
+
   const dueGoals = (goals ?? []) as { id: string; title: string; target_date: string; status: string }[];
   const tasksLeft = myTasks.filter((x) => !plan.doneIds.has(x.id)).length + dueGoals.length;
 
@@ -90,6 +118,43 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
         <div className="hero-track" aria-hidden>
           <i style={{ width: `${Math.max(0, Math.min(100, (n / duo.length_days) * 100))}%` }} />
         </div>
+      </section>
+
+      <section className="card">
+        <div className="row between">
+          <div>
+            <div className="row" style={{ gap: 8, alignItems: 'baseline' }}>
+              <span className="num" style={{ fontSize: 30, fontFamily: 'var(--font-display)' }}>{streak}</span>
+              <strong style={{ fontFamily: 'var(--font-display)', fontSize: 18 }}>
+                {streak === 1 ? 'day streak' : 'day streak'}
+              </strong>
+            </div>
+            <p className="tiny muted">
+              {streak === 0 ? 'A day scoring 70 or more starts one.' : 'A day holds it at 70 of 110.'}
+            </p>
+          </div>
+          <span style={{ fontSize: 34, filter: streak > 0 ? 'none' : 'grayscale(1) opacity(0.35)' }} aria-hidden>
+            🔥
+          </span>
+        </div>
+
+        <div className="row" style={{ gap: 8, alignItems: 'flex-end', height: 84, marginTop: 4 }}>
+          {weeks.map((w, i) => (
+            <div key={i} style={{ flex: '1 1 0', textAlign: 'center' }}>
+              <div
+                style={{
+                  height: Math.max(4, Math.round((w.sum / weekBest) * 68)),
+                  borderRadius: 7,
+                  background: i === weeks.length - 1 ? 'var(--player)' : 'var(--paper-sunk)',
+                  transition: 'height 0.5s cubic-bezier(.2,.8,.2,1)'
+                }}
+                title={`${w.sum} points`}
+              />
+              <div className="tiny faint" style={{ marginTop: 5 }}>{w.label}</div>
+            </div>
+          ))}
+        </div>
+        <p className="tiny faint">Points a week, last six weeks. A full week is 770.</p>
       </section>
 
       <Celebrate fire={dayComplete} once={`${duo.id}:${date}`} />

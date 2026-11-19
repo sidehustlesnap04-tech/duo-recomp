@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           // if the component never mounts, the app must not stay hidden.
           dangerouslySetInnerHTML={{
             __html:
-              "try{var s=sessionStorage.getItem('intro:v2');var calm=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!s&&!calm){document.documentElement.dataset.intro='on';setTimeout(function(){document.documentElement.removeAttribute('data-intro')},9000)}}catch(e){}"
+              "try{var th=localStorage.getItem('theme');var dark=th==='dark'||(!th&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=dark?'dark':'light';}catch(e){}try{var s=sessionStorage.getItem('intro:v2');var calm=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!s&&!calm){document.documentElement.dataset.intro='on';setTimeout(function(){document.documentElement.removeAttribute('data-intro')},9000)}}catch(e){}"
           }}
         />
         {/* Loaded by the browser rather than at build time, so the build does not depend on

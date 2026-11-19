@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server';
 import PushToggle from '@/components/PushToggle';
 import ReplayIntro from '@/components/ReplayIntro';
 import Icon3D, { type IconName } from '@/components/Icon3D';
+import ThemeToggle from '@/components/ThemeToggle';
 import { setNotificationPref } from '@/lib/actions';
 
 export const dynamic = 'force-dynamic';
@@ -107,6 +108,15 @@ export default async function More() {
             );
           })}
         </div>
+      </section>
+
+      <section className="card">
+        <div className="row" style={{ gap: 10 }}>
+          <Icon3D name="target" size={34} />
+          <h2>Appearance</h2>
+        </div>
+        <p className="small muted">Automatic follows your phone's own light and dark setting.</p>
+        <ThemeToggle />
       </section>
 
       <section className="card">
