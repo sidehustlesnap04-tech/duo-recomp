@@ -9,6 +9,7 @@ import { Ring, Bar, Stat, Empty } from '@/components/ui';
 import InviteCard from '@/components/InviteCard';
 import { toggleMeal, toggleWorkout, saveHabits, toggleTask } from '@/lib/actions';
 import { loadTasksForDay } from '@/lib/tasks';
+import Celebrate from '@/components/Celebrate';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,9 +36,14 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
   const partner = members.find((m) => m.user_id !== me.user_id);
   const t = day.targets;
   const workoutDone = !!day.checks[day.training ? 't_done' : 't_rest'];
+  const mealsLeft = day.menu.filter((m) => !m.logged).length;
 
   const myTasks = plan.onDay.filter((x) => x.owner_id === null || x.owner_id === me.user_id);
   const tasksLeft = myTasks.filter((x) => !plan.doneIds.has(x.id)).length;
+
+  // Everything the day asked for, actually done. Not a score threshold: a
+  // finished day, which is what deserves the noise.
+  const dayComplete = workoutDone && mealsLeft === 0 && tasksLeft === 0 && n >= 1 && n <= duo.length_days;
 
   const stage =
     n < 1
@@ -75,6 +81,25 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
           <i style={{ width: `${Math.max(0, Math.min(100, (n / duo.length_days) * 100))}%` }} />
         </div>
       </section>
+
+      <Celebrate fire={dayComplete} once={`${duo.id}:${date}`} />
+
+      {dayComplete ? (
+        <div className="cheer scene">
+          <div>
+            <div className="float">
+              <Mascot animal={me.mascot as 'fox' | 'rabbit'} pose="victory" size={58} />
+            </div>
+            <span className="cast-shadow" style={{ width: 34 }} aria-hidden />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <strong style={{ fontFamily: 'var(--font-display)', fontSize: 19 }}>Day {n}, finished.</strong>
+            <p className="small muted">
+              Every meal, the session and your tasks. {partner ? `${partner.display_name} can see it on the race.` : ''}
+            </p>
+          </div>
+        </div>
+      ) : null}
 
       {!partner ? <InviteCard duoId={duo.id} /> : null}
 
