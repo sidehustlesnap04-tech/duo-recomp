@@ -368,10 +368,12 @@ body:has(.chat) .shell { padding-bottom: 0; }
   padding-bottom: 4px;
 }
 
-/* A short conversation starts at the top, where it reads as a beginning
-   rather than as a screen that failed to fill. Once it outgrows the pane the
-   log scrolls, and the view follows the newest message to the bottom in the
-   usual way. */
+/* The newest message rests on the composer, as in every chat app, so empty
+   space collects above the conversation rather than below it.
+   margin-top on the first child rather than justify-content: flex-end on the
+   log — both look identical until the log overflows, at which point flex-end
+   makes the earliest messages unreachable. */
+.chat-log > :first-child { margin-top: auto; }
 
 .chat-day {
   align-self: center;
