@@ -43,7 +43,20 @@ export async function signUp(_prev: string | null, formData: FormData): Promise<
     password,
     options: { data: { display_name: displayName } }
   });
-  if (error) return error.message;
+  if (error) {
+    const code = error.code ?? '';
+    const msg = error.message.toLowerCase();
+    if (code === 'signup_disabled' || msg.includes('signups are disabled') || msg.includes('signup is disabled')) {
+      return 'New sign-ups are switched off for this app. Ask Amr to turn "Allow new users to sign up" back on in Supabase, then try again.';
+    }
+    if (msg.includes('already registered') || code === 'user_already_exists') {
+      return 'There is already an account with that email. Sign in instead.';
+    }
+    if (msg.includes('password')) {
+      return 'That password is too short — use at least 8 characters.';
+    }
+    return error.message;
+  }
 
   // With email confirmation on, sign-up returns a user but no session. Redirecting
   // into the app here would bounce straight back to sign-in with no explanation.
