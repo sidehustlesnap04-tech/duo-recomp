@@ -1,6 +1,6 @@
 import 'server-only';
 import * as webpush from 'web-push';
-import { pushConfigured } from '@/lib/push';
+import { pushConfigured, vapidFor, subjectFor } from '@/lib/vapid';
 
 /**
  * Sends a notification to the caller's own devices. Separate from
@@ -22,7 +22,11 @@ export async function testSelf(subs: { endpoint: string; p256dh: string; auth_ke
 
   const results = await Promise.allSettled(
     subs.map((s) =>
-      webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth_key } }, payload)
+      webpush.sendNotification(
+        { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth_key } },
+        payload,
+        { vapidDetails: vapidFor(s.endpoint) }
+      )
     )
   );
 
@@ -62,7 +66,10 @@ export async function testSelf(subs: { endpoint: string; p256dh: string; auth_ke
               ? `The push service refused it (${code}).`
               : 'The push service could not be reached.';
 
-    return { ok: false as const, error: `${explain}${detail ? ` — service said: ${detail}` : ''} [${host}]` };
+    return {
+      ok: false as const,
+      error: `${explain}${detail ? ` — service said: ${detail}` : ''} [${host}, sub=${subjectFor(subs[0].endpoint)}]`
+    };
   }
   return { ok: true as const, sent };
 }

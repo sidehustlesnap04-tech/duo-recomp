@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createECDH } from 'crypto';
+import { subjectFor } from '@/lib/vapid';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -50,7 +51,11 @@ export async function GET() {
         wellFormed: pubBytes === 65
       },
       privateKey: { present: Boolean(priv), bytes: priv ? decodedLength(priv) : 0 },
-      subject: { present: Boolean(subject), isMailto: subject.startsWith('mailto:') },
+      subject: {
+        configured: Boolean(subject),
+        sentToApple: subjectFor('https://web.push.apple.com/x'),
+        sentToOthers: subjectFor('https://fcm.googleapis.com/x')
+      },
       pairMatches: pub && priv ? pairMatches(pub, priv) : null,
       ready: Boolean(pub) && pubBytes === 65 && Boolean(priv) && pairMatches(pub, priv) === true
     },

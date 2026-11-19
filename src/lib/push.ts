@@ -2,15 +2,9 @@ import 'server-only';
 import * as webpush from 'web-push';
 import { createClient } from '@/lib/supabase/server';
 
-const PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '';
-const PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY ?? '';
-const SUBJECT = process.env.VAPID_SUBJECT ?? 'mailto:hello@duo-recomp.app';
+import { vapidFor, pushConfigured } from '@/lib/vapid';
 
-export const pushConfigured = () => Boolean(PUBLIC_KEY && PRIVATE_KEY);
-
-if (pushConfigured()) {
-  webpush.setVapidDetails(SUBJECT, PUBLIC_KEY, PRIVATE_KEY);
-}
+export { pushConfigured };
 
 export type PushNote = { title: string; body: string; url?: string; tag?: string };
 
@@ -39,7 +33,11 @@ export async function notifyPartner(category: 'chat' | 'partner_activity', note:
         await webpush.sendNotification(
           { endpoint: t.endpoint, keys: { p256dh: t.p256dh, auth: t.auth_key } },
           payload,
-          { TTL: 60 * 60 * 12, urgency: category === 'chat' ? 'high' : 'normal' }
+          {
+            TTL: 60 * 60 * 12,
+            urgency: category === 'chat' ? 'high' : 'normal',
+            vapidDetails: vapidFor(t.endpoint)
+          }
         );
         return true;
       } catch (err: any) {
