@@ -21,17 +21,19 @@ export function Ring({
     >
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(34,35,46,0.09)" strokeWidth={stroke} />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke="var(--player)"
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={`${(circ * pct).toFixed(1)} ${circ.toFixed(1)}`}
-          style={{ transition: 'stroke-dasharray 0.7s cubic-bezier(.2,.8,.2,1)' }}
-        />
+        {pct > 0 ? (
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            fill="none"
+            stroke="var(--player)"
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={`${(circ * pct).toFixed(1)} ${circ.toFixed(1)}`}
+            style={{ transition: 'stroke-dasharray 0.7s cubic-bezier(.2,.8,.2,1)' }}
+          />
+        ) : null}
       </svg>
       <span
         style={{

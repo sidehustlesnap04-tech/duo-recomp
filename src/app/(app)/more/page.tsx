@@ -47,8 +47,8 @@ export default async function More() {
             <h2>{me.display_name}</h2>
             <p className="small muted">{user.email}</p>
             <p className="tiny faint" style={{ marginTop: 4 }}>
-              {duo.name} · day {Math.max(1, Math.min(n, duo.length_days))} of {duo.length_days}
-              {partner ? ` · with ${partner.display_name}` : ''}
+              {duo.name}, day {Math.max(1, Math.min(n, duo.length_days))} of {duo.length_days}
+              {partner ? `, with ${partner.display_name}` : ''}
             </p>
           </div>
         </div>

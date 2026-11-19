@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>/* Duo Recomp.
+   A two-person, 84-day race. Pastels carry identity, never text: the fox reads
+   coral, the rabbit jade, and the base stays a cool paper so neither of them
+   has to fight a warm background to be seen. */
+
+:root {
+  /* Base: cool paper, not cream. Keeps both player hues honest. */
+  --bg: #eef0f6;
+  --bg-deep: #e4e7f1;
+  --paper: #ffffff;
+  --paper-sunk: #f5f6fa;
+
+  --ink: #22232e;
+  --ink-soft: #62657a;
+  --ink-faint: #9b9fb4;
+  --line: #e2e5ee;
+
+  /* Player identity. */
+  --coral: #e0705a;
+  --peach: #fadcd3;
+  --jade: #4e9e82;
+  --mint: #d2ebe0;
+
+  /* Supporting pastels. */
+  --lavender: #ded8f7;
+  --powder: #d7e4f8;
+  --butter: #f8e9bd;
+
+  --success: #3b8a65;
+  --warning: #9d6a15;
+  --danger: #bf4e3c;
+
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 26px;
+  --r-xl: 34px;
+
+  /* Layered rather than one flat drop: a tight contact shadow plus a wide soft one. */
+  --lift-1: 0 1px 2px rgba(34, 35, 46, 0.05), 0 4px 14px -8px rgba(34, 35, 46, 0.14);
+  --lift-2: 0 2px 4px rgba(34, 35, 46, 0.06), 0 18px 36px -20px rgba(34, 35, 46, 0.26);
+
+  --font-display: 'Bricolage Grotesque', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px;
+
+  --player: var(--coral);
+  --player-surface: var(--peach);
+  --player-wash: #fdf0ec;
+}
+[data-player='fox'] { --player: var(--coral); --player-surface: var(--peach); --player-wash: #fdf0ec; }
+[data-player='rabbit'] { --player: var(--jade); --player-surface: var(--mint); --player-wash: #eaf5f0; }
+
+* { box-sizing: border-box; }
+html, body { padding: 0; margin: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+h1 { font-size: clamp(28px, 7vw, 34px); }
+h2 { font-size: 19px; letter-spacing: -0.01em; }
+h3 { font-size: 16px; }
+p { margin: 0; }
+a { color: var(--ink); }
+
+.shell { max-width: 760px; margin: 0 auto; padding: 0 var(--s4) 112px; }
+.stack { display: flex; flex-direction: column; gap: var(--s4); }
+.row { display: flex; gap: var(--s3); align-items: center; flex-wrap: wrap; }
+.between { justify-content: space-between; }
+.grow { flex: 1 1 0; min-width: 0; }
+.muted { color: var(--ink-soft); }
+.faint { color: var(--ink-faint); }
+.small { font-size: 13px; }
+.tiny { font-size: 12.5px; }
+.num { font-variant-numeric: tabular-nums; font-weight: 700; }
+
+/* ---- surfaces -------------------------------------------------------- */
+
+.card {
+  background: var(--paper);
+  border-radius: var(--r-lg);
+  padding: var(--s5) var(--s4);
+  box-shadow: var(--lift-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  min-width: 0;
+}
+.card.tinted { background: var(--player-wash); box-shadow: none; }
+.card.sunk { background: var(--paper-sunk); box-shadow: none; }
+
+/* A heading with something small aligned opposite it. */
+.card-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); }
+
+/* ---- the day, the one loud thing ------------------------------------- */
+
+.hero {
+  position: relative;
+  margin: 0 calc(var(--s4) * -1);
+  padding: var(--s5) var(--s4) var(--s5);
+  border-radius: 0 0 var(--r-xl) var(--r-xl);
+  background:
+    radial-gradient(150% 100% at 85% 0%, var(--player-surface) 0%, transparent 62%),
+    linear-gradient(176deg, var(--player-wash), var(--paper) 78%);
+  box-shadow: var(--lift-2);
+  overflow: hidden;
+}
+.hero-meta { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+.hero-main { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); margin-top: var(--s2); }
+.hero-sub { font-size: 14px; color: var(--ink-soft); margin-top: 6px; }
+
+/* Thin line under the hero showing how far into the 84 days you are. */
+.hero-track { margin-top: var(--s5); height: 5px; border-radius: 999px; background: rgba(34, 35, 46, 0.09); overflow: hidden; }
+.hero-track > i { display: block; height: 100%; border-radius: 999px; background: var(--player); }
+
+/* ---- controls -------------------------------------------------------- */
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+.btn {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: transform 0.14s cubic-bezier(.2,.8,.2,1), box-shadow 0.18s, background 0.18s;
+}
+.btn:hover { box-shadow: var(--lift-1); }
+.btn:active { transform: scale(0.975); }
+.btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btn.player { background: var(--player); color: #fff; border-color: var(--player); }
+.btn.quiet { border-color: transparent; background: transparent; color: var(--ink-soft); min-height: 38px; padding: 8px 10px; }
+.btn.quiet:hover { background: var(--paper-sunk); box-shadow: none; }
+.btn.block { width: 100%; }
+.btn.tiny { min-height: 34px; padding: 6px 10px; font-size: 12.5px; }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.btn.done { background: var(--player-surface); border-color: transparent; color: var(--ink); }
+
+/* Quiet inline link, no arrow glued on the end. */
+.link-quiet {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 1.5px solid var(--line);
+  padding-bottom: 1px;
+  align-self: flex-start;
+}
+.link-quiet:hover { color: var(--ink); border-bottom-color: var(--player); }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+.field input, .field select {
+  background: var(--paper-sunk);
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  padding: 12px;
+  min-height: 46px;
+  width: 100%;
+  transition: background 0.16s, border-color 0.16s;
+}
+.field input:hover, .field select:hover { background: #eff1f6; }
+.field input:focus, .field select:focus { background: var(--paper); border-color: var(--player); outline: none; }
+:focus-visible { outline: 2px solid var(--player); outline-offset: 2px; }
+
+/* ---- rows of things to tick ------------------------------------------ */
+
+.tick-row {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: var(--s3);
+  align-items: center;
+  padding: 10px;
+  margin: 0 -10px;
+  border-radius: var(--r-md);
+  transition: background 0.18s;
+}
+.tick-row + .tick-row { margin-top: 2px; }
+.tick-row:hover { background: var(--paper-sunk); }
+.tick-row[data-done='true'] { background: var(--player-wash); }
+.tick-row[data-done='true'] .tick-title { color: var(--ink-soft); text-decoration: line-through; }
+.tick-title { font-weight: 600; }
+.tick-meta { font-size: 12.5px; color: var(--ink-soft); }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--paper-sunk);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.chip.warn { background: var(--butter); color: var(--warning); }
+
+.notice {
+  background: var(--butter);
+  color: var(--warning);
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  font-weight: 500;
+}
+.notice.bad { background: #fadfd9; color: var(--danger); }
+
+/* ---- floating tab bar ------------------------------------------------ */
+
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: saturate(1.7) blur(20px);
+  -webkit-backdrop-filter: saturate(1.7) blur(20px);
+  border-top: 1px solid rgba(226, 229, 238, 0.8);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -10px 30px -22px rgba(34, 35, 46, 0.5);
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  padding: 7px 8px calc(7px + env(safe-area-inset-bottom, 0px));
+}
+.tabbar a {
+  flex: 1 1 0;
+  max-width: 132px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--ink-faint);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 9px 2px;
+  border-radius: 999px;
+  transition: color 0.16s, background 0.16s;
+}
+.tabbar a:hover { color: var(--ink-soft); }
+.tabbar a[data-active='true'] { color: var(--ink); background: var(--player-surface); }
+
+.centre { min-height: 100dvh; display: grid; place-items: center; padding: var(--s4); }
+.centre .card { width: 100%; max-width: 420px; box-shadow: var(--lift-2); }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---- depth ------------------------------------------------------------
+   Real perspective rather than a WebGL canvas: the figures sit in a 3D
+   container and drift on their own axes, so the page has weight and
+   parallax without shipping a renderer to a phone. */
+
+.scene { perspective: 900px; perspective-origin: 50% 32%; }
+
+.float {
+  transform-style: preserve-3d;
+  animation: drift 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+.float.lag { animation-duration: 8s; animation-delay: -2.4s; }
+
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg); }
+  25%      { transform: translate3d(0, -5px, 16px) rotateX(5deg) rotateY(-6deg); }
+  50%      { transform: translate3d(0, -8px, 24px) rotateX(0deg) rotateY(0deg); }
+  75%      { transform: translate3d(0, -4px, 12px) rotateX(-4deg) rotateY(6deg); }
+}
+
+/* The ground shadow breathes against the drift, which is what sells the height. */
+.cast-shadow {
+  display: block;
+  height: 9px;
+  margin: -6px auto 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(34, 35, 46, 0.26), transparent);
+  animation: cast 6.5s ease-in-out infinite;
+}
+.float.lag + .cast-shadow { animation-duration: 8s; animation-delay: -2.4s; }
+
+@keyframes cast {
+  0%, 100% { transform: scaleX(1);    opacity: 0.55; }
+  50%      { transform: scaleX(0.76); opacity: 0.28; }
+}
+
+/* A disc that turns over when you complete something: motion that answers
+   the tap, not decoration. */
+@keyframes flip-done {
+  0%   { transform: rotateY(0deg)   scale(1); }
+  45%  { transform: rotateY(180deg) scale(1.16); }
+  100% { transform: rotateY(360deg) scale(1); }
+}
+.tick { transform-style: preserve-3d; }
+.tick[data-just='true'] { animation: flip-done 0.55s cubic-bezier(.2,.8,.2,1); }
+
+/* Extruded ring: a highlight above, contact shade below. */
+.ring-3d { position: relative; border-radius: 50%; }
+.ring-3d::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.85),
+    inset 0 -2px 4px rgba(34, 35, 46, 0.12);
+}
+
+/* ---- chat -------------------------------------------------------------
+   The log scrolls; the composer sits just above the tab bar. */
+
+.chat { display: flex; flex-direction: column; min-height: calc(100dvh - 190px); }
+.chat-log { flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; padding-bottom: var(--s4); }
+
+.chat-day {
+  align-self: center;
+  margin: var(--s4) 0 var(--s2);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  padding: 3px 12px;
+}
+
+.bubble-row { display: flex; align-items: flex-end; gap: 7px; margin-top: 8px; }
+.bubble-row.mine { justify-content: flex-end; }
+.bubble-face { flex: none; margin-bottom: 14px; }
+
+.bubble {
+  display: block;
+  text-align: left;
+  font: inherit;
+  border: none;
+  cursor: pointer;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 11px 15px;
+  border-radius: 22px 22px 22px 7px;
+  box-shadow: var(--lift-1);
+  word-break: break-word;
+  transition: transform 0.14s cubic-bezier(.2,.8,.2,1);
+  animation: bubble-in 0.26s cubic-bezier(.2,.8,.2,1);
+}
+.bubble:active { transform: scale(0.98); }
+.bubble.mine {
+  background: var(--player);
+  color: #fff;
+  border-radius: 22px 22px 7px 22px;
+  box-shadow: inset 0 -2px 6px rgba(34,35,46,0.16), 0 6px 14px -8px rgba(34,35,46,0.5);
+}
+.bubble[data-pending='true'] { opacity: 0.6; }
+
+@keyframes bubble-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+.bubble-meta { font-size: 11px; color: var(--ink-faint); padding: 3px 6px 0; }
+.bubble-meta.mine { text-align: right; }
+
+.reaction {
+  border: none;
+  cursor: pointer;
+  background: var(--paper);
+  box-shadow: var(--lift-1);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 14px;
+  margin-top: -6px;
+  animation: pop-in 0.3s cubic-bezier(.2,1.5,.4,1);
+}
+@keyframes pop-in { from { transform: scale(0); } to { transform: scale(1); } }
+
+.react-bar {
+  display: flex;
+  gap: 2px;
+  margin-top: 6px;
+  background: var(--paper);
+  border-radius: 999px;
+  padding: 4px;
+  box-shadow: var(--lift-2);
+  width: fit-content;
+  animation: pop-in 0.22s cubic-bezier(.2,1.4,.4,1);
+}
+.react-bar button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 19px;
+  line-height: 1;
+  padding: 5px 7px;
+  border-radius: 999px;
+  transition: transform 0.14s, background 0.14s;
+}
+.react-bar button:hover { background: var(--paper-sunk); transform: scale(1.22); }
+
+.composer {
+  position: sticky;
+  bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: saturate(1.6) blur(16px);
+  -webkit-backdrop-filter: saturate(1.6) blur(16px);
+  border-radius: 999px;
+  box-shadow: var(--lift-2);
+}
+.composer input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  padding: 0 12px;
+  min-height: 44px;
+  outline: none;
+}
+.btn.send {
+  min-height: 44px;
+  width: 44px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 19px;
+  font-weight: 700;
+  flex: none;
+}
+
+/* ---- celebration ------------------------------------------------------
+   Fires when a day is actually finished, not on a timer. */
+
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; overflow: hidden; }
+.confetti i {
+  position: absolute;
+  top: -12vh;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: fall 2.8s cubic-bezier(.25,.6,.4,1) forwards;
+}
+@keyframes fall {
+  0%   { opacity: 0; transform: translate3d(0, 0, 0) rotateX(0) rotateZ(0); }
+  8%   { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(var(--dx, 0), 115vh, 0) rotateX(720deg) rotateZ(var(--dr, 360deg)); }
+}
+
+.cheer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, var(--player-surface), var(--paper) 75%);
+  border-radius: var(--r-lg);
+  padding: var(--s4);
+  box-shadow: var(--lift-2);
+  animation: cheer-in 0.5s cubic-bezier(.2,1.3,.4,1);
+}
+@keyframes cheer-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.95); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Reduced motion already flattens the animations above. */
+
+/* Stack bubble, timestamp and reaction, and hang them off the correct edge. */
+.bubble-row > div { display: flex; flex-direction: column; align-items: flex-start; }
+.bubble-row.mine > div { align-items: flex-end; }
+</style>
+</head><body><div data-player="fox"><div class="shell">
+<header class="row between" style="padding:16px 0 8px">
+  <strong style="font-family:var(--font-display);font-size:17px">Duo Recomp</strong>
+  <button class="btn quiet tiny">Sign out</button>
+</header>
+<main class="stack">
+
+<section class="hero scene">
+  <div class="hero-meta">Day 1 of 84</div>
+  <div class="hero-main">
+    <div style="min-width:0">
+      <h1>Upper</h1>
+      <p class="hero-sub">7 exercises waiting</p>
+    </div>
+    <div class="scene" style="display:flex;align-items:center;gap:10px">
+      <div>
+        <div class="float">__FOX__</div>
+        <span class="cast-shadow" style="width:46px"></span>
+      </div>
+      <div class="ring-3d">__RING__</div>
+    </div>
+  </div>
+  <div class="hero-track"><i style="width:1.2%"></i></div>
+</section>
+
+<section class="card">
+  <div class="card-head"><h2>Planned</h2><span class="tiny faint">2 left</span></div>
+  <div class="tick-row" data-done="true">
+    <button class="tick" style="width:44px;height:44px;border-radius:50%;border:none;background:var(--player);color:#fff;font-size:19px;box-shadow:inset 0 -2px 4px rgba(34,35,46,.18),0 4px 10px -4px rgba(34,35,46,.4)">✓</button>
+    <div><div class="tick-title">Pick up the protein order</div><div class="tick-meta">18:00&nbsp;&nbsp;Shared</div></div>
+    <span></span>
+  </div>
+  <div class="tick-row" data-done="false">
+    <button class="tick" style="width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--paper);color:transparent;font-size:19px">✓</button>
+    <div><div class="tick-title">Call the clinic about the blood test</div><div class="tick-meta">Amr</div></div>
+    <span class="chip">Event</span>
+  </div>
+  <div class="tick-row" data-done="false">
+    <button class="tick" style="width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--paper);color:transparent;font-size:19px">✓</button>
+    <div><div class="tick-title">Walk after dinner</div><div class="tick-meta">20:30&nbsp;&nbsp;Shared</div></div>
+    <span></span>
+  </div>
+  <a class="link-quiet" href="#">Open the calendar</a>
+</section>
+
+<section class="card">
+  <div class="card-head"><h2>Food</h2></div>
+  <div>
+    <div class="row between tiny"><span class="muted">Calories</span><span class="num">1 410 / 2 200</span></div>
+    <div style="height:9px;border-radius:999px;background:rgba(34,35,46,.07);overflow:hidden;margin-top:6px"><div style="width:64%;height:100%;border-radius:999px;background:var(--player)"></div></div>
+  </div>
+  <div>
+    <div class="row between tiny"><span class="muted">Protein, 120–150 g</span><span class="num">96 / 150 g</span></div>
+    <div style="height:9px;border-radius:999px;background:rgba(34,35,46,.07);overflow:hidden;margin-top:6px"><div style="width:64%;height:100%;border-radius:999px;background:var(--player)"></div></div>
+  </div>
+  <div class="tick-row" data-done="true" style="grid-template-columns:44px 1fr">
+    <button class="tick" style="width:44px;height:44px;border-radius:50%;border:none;background:var(--player);color:#fff;font-size:19px;box-shadow:inset 0 -2px 4px rgba(34,35,46,.18),0 4px 10px -4px rgba(34,35,46,.4)">✓</button>
+    <div><div class="tiny faint">Breakfast</div><div class="tick-title">Ful with olive oil and lemon</div><div class="tick-meta">430 kcal&nbsp;&nbsp;19 g protein</div></div>
+  </div>
+  <div class="tick-row" data-done="false" style="grid-template-columns:44px 1fr">
+    <button class="tick" style="width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--paper);color:transparent;font-size:19px">✓</button>
+    <div><div class="tiny faint">Lunch</div><div class="tick-title">Grilled chicken, rice and salad</div><div class="tick-meta">620 kcal&nbsp;&nbsp;48 g protein</div></div>
+  </div>
+</section>
+
+<section class="card scene" data-player="rabbit">
+  <div class="row between">
+    <div class="row" style="gap:12px">
+      <div><div class="float lag">__RABBIT__</div><span class="cast-shadow" style="width:32px"></span></div>
+      <div><strong>Nour</strong><div class="tiny muted">1 240 points so far</div></div>
+    </div>
+    <div class="ring-3d">__RING_S__</div>
+  </div>
+  <a class="link-quiet" href="#">See the race</a>
+</section>
+
+</main></div>
+<nav class="tabbar">
+  <a href="#" data-active="true">Today</a><a href="#">Race</a><a href="#">Calendar</a>
+  <a href="#">Fitness</a><a href="#">Progress</a><a href="#">Together</a>
+</nav>
+</div></body></html>

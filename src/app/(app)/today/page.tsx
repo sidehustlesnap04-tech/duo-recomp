@@ -191,7 +191,7 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
             <Bar value={day.totals.kcal} max={t.kcal} tone={day.totals.kcal > t.kcal * 1.07 ? 'bad' : undefined} />
           </div>
           <div>
-            <div className="row between tiny"><span className="muted">Protein · {t.protein_min}–{t.protein_cap} g</span><span className="num">{Math.round(day.totals.p)} / {t.protein_cap} g</span></div>
+            <div className="row between tiny"><span className="muted">Protein, {t.protein_min}–{t.protein_cap} g</span><span className="num">{Math.round(day.totals.p)} / {t.protein_cap} g</span></div>
             <Bar value={day.totals.p} max={t.protein_cap} tone={day.totals.p > t.protein_cap + 0.5 ? 'bad' : undefined} />
           </div>
           {day.totals.p > t.protein_cap + 0.5 ? (
@@ -231,9 +231,9 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
       <form action={async (fd: FormData) => { 'use server'; await saveHabits(date, fd); }} className="card">
         <h2>Habits</h2>
         <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr' }}>
-          <div className="field"><label htmlFor="steps">Steps · goal {day.cardio.steps.toLocaleString()}</label><input id="steps" name="steps" type="number" inputMode="numeric" defaultValue={day.log?.steps ?? ''} /></div>
+          <div className="field"><label htmlFor="steps">Steps, goal {day.cardio.steps.toLocaleString()}</label><input id="steps" name="steps" type="number" inputMode="numeric" defaultValue={day.log?.steps ?? ''} /></div>
           <div className="field"><label htmlFor="sleep_h">Sleep, hours</label><input id="sleep_h" name="sleep_h" type="number" step="0.25" inputMode="decimal" defaultValue={day.log?.sleep_h ?? ''} /></div>
-          <div className="field"><label htmlFor="water_l">Water, L · goal {t?.water_l ?? '—'}</label><input id="water_l" name="water_l" type="number" step="0.1" inputMode="decimal" defaultValue={day.log?.water_l ?? ''} /></div>
+          <div className="field"><label htmlFor="water_l">Water in litres, goal {t?.water_l ?? '—'}</label><input id="water_l" name="water_l" type="number" step="0.1" inputMode="decimal" defaultValue={day.log?.water_l ?? ''} /></div>
           <div className="field"><label htmlFor="cardio_min">Cardio, minutes</label><input id="cardio_min" name="cardio_min" type="number" inputMode="numeric" defaultValue={day.log?.cardio_min ?? ''} /></div>
           <div className="field"><label htmlFor="weight_kg">Weight, kg</label><input id="weight_kg" name="weight_kg" type="number" step="0.1" inputMode="decimal" defaultValue={day.body?.weight_kg ?? ''} /></div>
           <div className="field"><label htmlFor="waist_cm">Waist, cm</label><input id="waist_cm" name="waist_cm" type="number" step="0.1" inputMode="decimal" defaultValue={day.body?.waist_cm ?? ''} /></div>
