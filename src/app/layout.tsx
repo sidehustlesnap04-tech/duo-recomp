@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Intro from '@/components/Intro';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -41,7 +42,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {/* Overlays the app rather than gating it: whatever is underneath is
+            already rendered and interactive, so the opening never delays
+            signing in. */}
+        <Intro />
+        {children}
+      </body>
     </html>
   );
 }

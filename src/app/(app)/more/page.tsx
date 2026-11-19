@@ -6,6 +6,7 @@ import { dayNumber } from '@/lib/plan';
 import { todayISO } from '@/lib/day';
 import { createClient } from '@/lib/supabase/server';
 import PushToggle from '@/components/PushToggle';
+import ReplayIntro from '@/components/ReplayIntro';
 import { setNotificationPref } from '@/lib/actions';
 
 export const dynamic = 'force-dynamic';
@@ -96,6 +97,14 @@ export default async function More() {
             );
           })}
         </div>
+      </section>
+
+      <section className="card">
+        <h2>Opening</h2>
+        <p className="small muted">
+          The animation plays once on this device. Replay it if you want to show someone.
+        </p>
+        <ReplayIntro />
       </section>
 
       <section className="card">
