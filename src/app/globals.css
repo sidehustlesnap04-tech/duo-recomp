@@ -55,6 +55,7 @@
 html, body { padding: 0; margin: 0; }
 
 body {
+  --tab-space: 76px;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
@@ -351,7 +352,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .chat {
   display: flex;
   flex-direction: column;
-  height: calc(var(--vvh, 100dvh) - 198px);
+  height: calc(var(--vvh, 100dvh) - 122px - var(--tab-space));
 }
 body:has(.chat) .shell { padding-bottom: 0; }
 
@@ -460,7 +461,7 @@ body:has(.chat) .shell { padding-bottom: 0; }
   left: 50%;
   transform: translateX(-50%);
   width: min(calc(100% - 32px), 728px);
-  top: calc(var(--vvt, 0px) + var(--vvh, 100dvh) - 68px - var(--tab-space, 76px));
+  top: calc(var(--vvt, 0px) + var(--vvh, 100dvh) - 68px - var(--tab-space));
   z-index: 11;
   display: flex;
   gap: 8px;
@@ -475,7 +476,7 @@ body:has(.chat) .shell { padding-bottom: 0; }
 
 /* With the keyboard up the tab bar is unreachable anyway, so it leaves and
    the composer takes its place directly on top of the keyboard. */
-body[data-kb='open'] .composer { --tab-space: 8px; }
+body[data-kb='open'] { --tab-space: 8px; }
 body[data-kb='open'] .tabbar { transform: translateY(115%); }
 .tabbar { transition: transform 0.18s ease-out; }
 .composer input {
