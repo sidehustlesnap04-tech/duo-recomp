@@ -24,10 +24,40 @@ export default function Mascot({
   const armA = pose === 'victory' ? 'rotate(-148 44 56)' : pose === 'run' ? 'rotate(-34 44 56)' : 'none';
   const armB = pose === 'victory' ? 'rotate(-120 68 56)' : pose === 'run' ? 'rotate(30 68 56)' : 'none';
 
+  const fid = `clay-${animal}`;
+
   return (
     <svg width={size} height={size} viewBox="0 0 120 120" fill="none" role="img" aria-label={`${animal}, ${pose}`}>
-      <ellipse cx="60" cy="112" rx="26" ry="4" fill={c.ink} opacity="0.12" />
-      <g transform={lean}>
+      <defs>
+        {/* Lights the figure from the upper left. The blurred alpha becomes a
+            surface normal, so every shape picks up a rounded highlight and reads
+            as a sculpted object rather than a flat cut-out. */}
+        <filter id={fid} x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="3.2" result="surface" />
+          <feSpecularLighting
+            in="surface"
+            surfaceScale="4.5"
+            specularConstant="0.5"
+            specularExponent="20"
+            lightingColor="#ffffff"
+            result="spec"
+          >
+            <fePointLight x="-30" y="-50" z="130" />
+          </feSpecularLighting>
+          <feComposite in="spec" in2="SourceAlpha" operator="in" result="specClipped" />
+          <feComposite in="SourceGraphic" in2="specClipped" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="lit" />
+          <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="shadowBlur" />
+          <feOffset in="shadowBlur" dy="4" result="shadowOffset" />
+          <feFlood floodColor="#22232e" floodOpacity="0.22" result="shadowColour" />
+          <feComposite in="shadowColour" in2="shadowOffset" operator="in" result="shadow" />
+          <feMerge>
+            <feMergeNode in="shadow" />
+            <feMergeNode in="lit" />
+          </feMerge>
+        </filter>
+      </defs>
+      <ellipse cx="60" cy="112" rx="26" ry="4.5" fill={c.ink} opacity="0.16" />
+      <g transform={lean} filter={`url(#${fid})`}>
         {/* tail */}
         {animal === 'fox' ? (
           <path d="M40 78 C14 76 8 52 24 40 C20 60 30 68 42 68 Z" fill={c.dark} />

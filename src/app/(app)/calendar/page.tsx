@@ -1,42 +1,23 @@
-import { createClient } from '@/lib/supabase/server';
 import { requireSession } from '@/lib/duo';
 import { todayISO } from '@/lib/day';
 import { addTask, toggleTask, deleteTask } from '@/lib/actions';
 import TickButton from '@/components/TickButton';
+import { loadTasksForDay, occursOn } from '@/lib/tasks';
 
 export const dynamic = 'force-dynamic';
 
 const CATEGORIES = ['gym', 'meal', 'health', 'work', 'shopping', 'personal', 'couple', 'other'];
 
-function occursOn(t: any, date: string) {
-  if (date < t.due_date) return false;
-  if (t.repeat_until && date > t.repeat_until) return false;
-  const days = Math.round((new Date(date + 'T12:00:00').getTime() - new Date(t.due_date + 'T12:00:00').getTime()) / 86400000);
-  switch (t.recurrence) {
-    case 'daily': return true;
-    case 'weekly': return days % 7 === 0;
-    case 'monthly': return new Date(date + 'T12:00:00').getDate() === new Date(t.due_date + 'T12:00:00').getDate();
-    case 'custom': return days % Math.max(1, t.repeat_every ?? 1) === 0;
-    default: return days === 0;
-  }
-}
-
 export default async function Calendar({ searchParams }: { searchParams: { d?: string } }) {
   const { duo, members, me } = await requireSession();
   const date = searchParams.d ?? todayISO();
-  const supabase = createClient();
-
-  const [{ data: tasks }, { data: completions }] = await Promise.all([
-    supabase.from('tasks').select('*').eq('duo_id', duo.id).order('due_time', { nullsFirst: false }),
-    supabase.from('task_completions').select('*').eq('occurrence_date', date)
-  ]);
+  const plan = await loadTasksForDay(duo.id, date);
+  const tasks = plan.all;
 
   const nameOf = (id: string | null) => (id === null ? 'Shared' : members.find((m) => m.user_id === id)?.display_name ?? 'Someone');
-  const onDay = (tasks ?? []).filter((t) => occursOn(t, date));
-  const doneIds = new Set((completions ?? []).map((c) => c.task_id));
-  const overdue = (tasks ?? []).filter(
-    (t) => t.kind === 'task' && t.recurrence === 'none' && t.due_date < date && !doneIds.has(t.id)
-  );
+  const onDay = plan.onDay;
+  const doneIds = plan.doneIds;
+  const overdue = plan.overdue;
   // --- month grid -------------------------------------------------------
   const iso = (y: number, m: number, d: number) => new Date(Date.UTC(y, m, d, 12)).toISOString().slice(0, 10);
   const sel = new Date(date + 'T12:00:00');
@@ -50,7 +31,7 @@ export default async function Calendar({ searchParams }: { searchParams: { d?: s
     ...Array.from({ length: lead }, () => null),
     ...Array.from({ length: daysInMonth }, (_, i) => {
       const d = iso(year, month, i + 1);
-      return { d, day: i + 1, count: (tasks ?? []).filter((t) => occursOn(t, d)).length };
+      return { d, day: i + 1, count: tasks.filter((t) => occursOn(t, d)).length };
     })
   ];
   while (cells.length % 7 !== 0) cells.push(null);

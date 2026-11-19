@@ -7,7 +7,8 @@ import Mascot, { poseFor } from '@/components/Mascot';
 import TickButton from '@/components/TickButton';
 import { Ring, Bar, Stat, Empty } from '@/components/ui';
 import InviteCard from '@/components/InviteCard';
-import { toggleMeal, toggleWorkout, saveHabits } from '@/lib/actions';
+import { toggleMeal, toggleWorkout, saveHabits, toggleTask } from '@/lib/actions';
+import { loadTasksForDay } from '@/lib/tasks';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,11 +17,12 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
   const date = searchParams.d ?? todayISO();
   const supabase = createClient();
 
-  const day = await loadDay(me!.user_id, duo.id, duo.starts_on, date);
-  const { data: scores } = await supabase
-    .from('daily_scores').select('user_id, points, bonus').eq('duo_id', duo.id).eq('score_date', date);
-  const { data: allScores } = await supabase
-    .from('daily_scores').select('user_id, points, bonus').eq('duo_id', duo.id);
+  const [day, plan, { data: scores }, { data: allScores }] = await Promise.all([
+    loadDay(me.user_id, duo.id, duo.starts_on, date),
+    loadTasksForDay(duo.id, date),
+    supabase.from('daily_scores').select('user_id, points, bonus').eq('duo_id', duo.id).eq('score_date', date),
+    supabase.from('daily_scores').select('user_id, points, bonus').eq('duo_id', duo.id)
+  ]);
 
   const scoreFor = (id: string) => {
     const r = (scores ?? []).find((s) => s.user_id === id);
@@ -30,39 +32,125 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
     (allScores ?? []).filter((s) => s.user_id === id).reduce((n, s) => n + s.points + s.bonus, 0);
 
   const n = dayNumber(duo.starts_on, date);
-  const partner = members.find((m) => m.user_id !== me!.user_id);
+  const partner = members.find((m) => m.user_id !== me.user_id);
   const t = day.targets;
   const workoutDone = !!day.checks[day.training ? 't_done' : 't_rest'];
 
+  const myTasks = plan.onDay.filter((x) => x.owner_id === null || x.owner_id === me.user_id);
+  const tasksLeft = myTasks.filter((x) => !plan.doneIds.has(x.id)).length;
+
+  const stage =
+    n < 1
+      ? `Starts ${new Date(duo.starts_on + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}`
+      : n > duo.length_days
+        ? 'Challenge complete'
+        : `Day ${n} of ${duo.length_days}`;
+
   return (
     <>
-      <div className="card tinted">
-        <span className="tiny" style={{ letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700 }}>
-          {n < 1 ? `Starts ${duo.starts_on}` : n > duo.length_days ? 'Challenge complete' : `Day ${n} of ${duo.length_days}`}
-        </span>
-        <div className="row between">
-          <h1>{day.training ? `${day.sessionName} day` : 'Rest day'}</h1>
-          <Ring value={scoreFor(me!.user_id)} max={110} />
+      <section className="hero scene">
+        <div className="hero-meta">{stage}</div>
+        <div className="hero-main">
+          <div style={{ minWidth: 0 }}>
+            <h1>{day.training ? day.sessionName : 'Rest day'}</h1>
+            <p className="hero-sub">
+              {day.training
+                ? `${day.exercises.length} exercises waiting`
+                : 'Recovery scores the same as training'}
+            </p>
+          </div>
+          <div className="scene" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div>
+              <div className="float">
+                <Mascot animal={me.mascot as 'fox' | 'rabbit'} pose={poseFor(scoreFor(me.user_id), workoutDone)} size={78} />
+              </div>
+              <span className="cast-shadow" style={{ width: 46 }} aria-hidden />
+            </div>
+            <div className="ring-3d">
+              <Ring value={scoreFor(me.user_id)} max={110} size={82} />
+            </div>
+          </div>
         </div>
-      </div>
+        <div className="hero-track" aria-hidden>
+          <i style={{ width: `${Math.max(0, Math.min(100, (n / duo.length_days) * 100))}%` }} />
+        </div>
+      </section>
 
       {!partner ? <InviteCard duoId={duo.id} /> : null}
 
       {partner ? (
-        <div className="card" data-player={partner.mascot}>
+        <div className="card scene" data-player={partner.mascot}>
           <div className="row between">
-            <div className="row" style={{ gap: 10 }}>
-              <Mascot animal={partner.mascot as 'fox' | 'rabbit'} pose={poseFor(scoreFor(partner.user_id), true)} size={52} />
+            <div className="row" style={{ gap: 12 }}>
+              <div>
+                <div className="float lag">
+                  <Mascot animal={partner.mascot as 'fox' | 'rabbit'} pose={poseFor(scoreFor(partner.user_id), true)} size={54} />
+                </div>
+                <span className="cast-shadow" style={{ width: 32 }} aria-hidden />
+              </div>
               <div>
                 <strong>{partner.display_name}</strong>
                 <div className="tiny muted">{totalFor(partner.user_id).toLocaleString()} points so far</div>
               </div>
             </div>
-            <Ring value={scoreFor(partner.user_id)} max={110} size={56} label="partner" />
+            <div className="ring-3d">
+              <Ring value={scoreFor(partner.user_id)} max={110} size={58} label="partner" />
+            </div>
           </div>
-          <Link href="/race" className="tiny muted">See the race →</Link>
+          <Link href="/race" className="link-quiet">See the race</Link>
         </div>
       ) : null}
+
+      <section className="card">
+        <div className="card-head">
+          <h2>Planned</h2>
+          <span className="tiny faint">
+            {tasksLeft ? `${tasksLeft} left` : myTasks.length ? 'All done' : null}
+          </span>
+        </div>
+
+        {plan.overdue.length ? (
+          <p className="notice">
+            {plan.overdue.length === 1
+              ? `“${plan.overdue[0].title}” was due ${plan.overdue[0].due_date} and is still open.`
+              : `${plan.overdue.length} tasks from earlier days are still open.`}
+          </p>
+        ) : null}
+
+        {plan.onDay.length === 0 ? (
+          <p className="small muted">Nothing planned for today. Add something from the calendar, or take the quiet.</p>
+        ) : (
+          plan.onDay.map((task) => {
+            const done = plan.doneIds.has(task.id);
+            const mine = task.owner_id === null || task.owner_id === me.user_id;
+            const whose =
+              task.owner_id === null
+                ? 'Shared'
+                : members.find((m) => m.user_id === task.owner_id)?.display_name ?? 'Someone';
+            return (
+              <div key={task.id} className="tick-row" data-done={done ? 'true' : 'false'}>
+                {mine ? (
+                  <form action={async () => { 'use server'; await toggleTask(task.id, date, done); }}>
+                    <TickButton done={done} label={task.title} />
+                  </form>
+                ) : (
+                  <span className="tiny faint" style={{ width: 44, textAlign: 'center' }}>—</span>
+                )}
+                <div style={{ minWidth: 0 }}>
+                  <div className="tick-title">{task.title}</div>
+                  <div className="tick-meta">
+                    {task.due_time ? <span>{task.due_time.slice(0, 5)}&nbsp;&nbsp;</span> : null}
+                    <span>{whose}</span>
+                  </div>
+                </div>
+                {task.kind === 'event' ? <span className="chip">Event</span> : null}
+              </div>
+            );
+          })
+        )}
+
+        <Link href="/calendar" className="link-quiet">Open the calendar</Link>
+      </section>
 
       {!t ? (
         <Empty
@@ -86,30 +174,30 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
           ) : null}
 
           {day.menu.map(({ slot, mealId, meal, totals, logged }) => (
-            <div key={slot.id} style={{ display: 'grid', gridTemplateColumns: '44px 1fr', gap: 12, alignItems: 'center', paddingTop: 10, borderTop: '1px solid var(--line)' }}>
+            <div key={slot.id} className="tick-row" data-done={logged ? 'true' : 'false'} style={{ gridTemplateColumns: '44px 1fr' }}>
               <form action={async () => { 'use server'; await toggleMeal(date, slot.id, mealId, logged); }}>
                 <TickButton done={logged} label={meal.n} />
               </form>
               <div style={{ minWidth: 0 }}>
-                <div className="tiny muted">{slot.n}</div>
-                <div style={{ fontWeight: 600, textDecoration: logged ? 'line-through' : 'none', color: logged ? 'var(--ink-soft)' : undefined }}>{meal.n}</div>
-                <div className="tiny muted">{totals.kcal} kcal · {totals.p} g protein</div>
+                <div className="tiny faint">{slot.n}</div>
+                <div className="tick-title">{meal.n}</div>
+                <div className="tick-meta">{totals.kcal} kcal&nbsp;&nbsp;{totals.p} g protein</div>
               </div>
             </div>
           ))}
-          <Link href="/fitness" className="tiny muted">Swap meals, add anything else →</Link>
+          <Link href="/fitness" className="link-quiet">Swap meals, or add something else</Link>
         </div>
       )}
 
       <div className="card">
         <h2>{day.training ? day.sessionName : 'Rest'}</h2>
         <form action={async () => { 'use server'; await toggleWorkout(date, day.training, workoutDone); }}>
-          <button className="btn block" type="submit" style={workoutDone ? { background: 'var(--mint)', borderColor: 'var(--jade)' } : undefined}>
+          <button className={workoutDone ? 'btn block done' : 'btn block'} type="submit">
             {workoutDone ? (day.training ? '✓ Workout done' : '✓ Rest day taken') : day.training ? 'Mark workout done' : 'Mark rest day taken'}
           </button>
         </form>
         {day.training ? (
-          <Link href="/fitness" className="tiny muted">{day.exercises.length} exercises · log your sets →</Link>
+          <Link href="/fitness" className="link-quiet">Log your sets</Link>
         ) : (
           <p className="tiny muted">Recovery counts for the same 30 points as a workout.</p>
         )}

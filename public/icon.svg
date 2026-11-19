@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Duo Recomp">
+  <title>Duo Recomp</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eceff7"/>
+    </linearGradient>
+    <linearGradient id="foxG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ef9078"/>
+      <stop offset="1" stop-color="#cc5742"/>
+    </linearGradient>
+    <linearGradient id="rabG" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6ab79c"/>
+      <stop offset="1" stop-color="#3c8569"/>
+    </linearGradient>
+    <!-- The lighting the mascots use, so the mark belongs to the same world. -->
+    <filter id="lit" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="s"/>
+      <feSpecularLighting in="s" surfaceScale="5" specularConstant="0.42" specularExponent="24" lighting-color="#fff" result="sp">
+        <fePointLight x="90" y="60" z="300"/>
+      </feSpecularLighting>
+      <feComposite in="sp" in2="SourceAlpha" operator="in" result="spc"/>
+      <feComposite in="SourceGraphic" in2="spc" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="114" fill="url(#bg)"/>
+
+  <g filter="url(#lit)" transform="translate(-14 0)">
+    <!-- Rabbit: ears rooted on the ring, so it reads as a head and not a hat. -->
+    <g fill="url(#rabG)">
+      <rect x="310" y="166" width="30" height="86" rx="15" transform="rotate(-7 325 209)"/>
+      <rect x="348" y="174" width="30" height="80" rx="15" transform="rotate(8 363 214)"/>
+    </g>
+    <circle cx="334" cy="302" r="84" fill="none" stroke="url(#rabG)" stroke-width="31"/>
+
+    <!-- Fox: swept ears, drawn over the rabbit ring. -->
+    <g fill="url(#foxG)">
+      <path d="M152 243 L140 164 L204 212 Z"/>
+      <path d="M238 214 L282 172 L278 244 Z"/>
+    </g>
+    <circle cx="200" cy="302" r="84" fill="none" stroke="url(#foxG)" stroke-width="31"/>
+
+    <!-- The rabbit ring crosses back over at the foot: a true interlock, which is
+         what makes the pair read as joined rather than merely overlapping. -->
+    <path d="M 303.0 380.9 A 84 84 0 0 1 258.6 348.6"
+          fill="none" stroke="url(#rabG)" stroke-width="31" stroke-linecap="butt"/>
+  </g>
+</svg>
