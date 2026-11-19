@@ -11,6 +11,25 @@ const b64ToBytes = (base64: string) => {
   return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
 };
 
+/**
+ * A VAPID public key is an uncompressed P-256 point: 65 bytes starting 0x04.
+ * Checking here turns a missing or mistyped environment variable into a
+ * sentence someone can act on, instead of the browser's
+ * "applicationServerKey must contain a valid P-256 public key".
+ */
+const keyProblem = (key: string): string | null => {
+  if (!key) return 'The server did not supply a notification key. Check that VAPID_PUBLIC_KEY is set in Vercel and that you redeployed afterwards.';
+  try {
+    const bytes = b64ToBytes(key);
+    if (bytes.length !== 65 || bytes[0] !== 4) {
+      return `The notification key on the server is malformed: ${bytes.length} bytes, expected 65. Re-paste it, making sure no characters were trimmed.`;
+    }
+    return null;
+  } catch {
+    return 'The notification key on the server is not valid base64url. Re-paste it exactly as given.';
+  }
+};
+
 export default function PushToggle({ vapidPublicKey }: { vapidPublicKey: string }) {
   const [state, setState] = useState<State>('checking');
   const [note, setNote] = useState<string | null>(null);
@@ -28,6 +47,13 @@ export default function PushToggle({ vapidPublicKey }: { vapidPublicKey: string 
       }
       if (Notification.permission === 'denied') return setState('blocked');
 
+      const problem = keyProblem(vapidPublicKey);
+      if (problem) {
+        setNote(problem);
+        setState('off');
+        return;
+      }
+
       const reg = await navigator.serviceWorker.getRegistration();
       const existing = await reg?.pushManager.getSubscription();
       setState(existing ? 'on' : 'off');
@@ -35,6 +61,12 @@ export default function PushToggle({ vapidPublicKey }: { vapidPublicKey: string 
   }, []);
 
   async function enable() {
+    const problem = keyProblem(vapidPublicKey);
+    if (problem) {
+      setNote(problem);
+      setState('off');
+      return;
+    }
     setState('working');
     setNote(null);
     try {

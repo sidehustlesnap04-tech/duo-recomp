@@ -70,7 +70,7 @@ export default async function More() {
           Each phone asks separately, so turning this on here does not turn it on for{' '}
           {partner ? partner.display_name : 'your partner'}.
         </p>
-        <PushToggle vapidPublicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ''} />
+        <PushToggle vapidPublicKey={process.env.VAPID_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ''} />
 
         <div style={{ borderTop: '1px solid var(--line)', paddingTop: 12, marginTop: 4 }}>
           {CATEGORIES.map((c) => {

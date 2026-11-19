@@ -2,7 +2,7 @@ import 'server-only';
 import * as webpush from 'web-push';
 import { createClient } from '@/lib/supabase/server';
 
-const PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '';
+const PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '';
 const PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY ?? '';
 const SUBJECT = process.env.VAPID_SUBJECT ?? 'mailto:hello@duo-recomp.app';
 
