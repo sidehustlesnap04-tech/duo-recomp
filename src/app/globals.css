@@ -354,7 +354,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
   gap: 4px;
   justify-content: flex-end;
   padding-bottom: 86px;
-  min-height: calc(100dvh - 300px);
+  /* Sized so the newest message lands just above the composer rather than
+     halfway up an empty screen. Tracks the live viewport, so it shrinks with
+     the keyboard instead of leaving a hole behind it. */
+  min-height: calc(var(--vvh, 100dvh) - 112px);
 }
 
 .chat-day {
