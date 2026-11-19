@@ -150,6 +150,21 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
         </div>
       </section>
 
+      {/* The one thing to do now. Everything below this is reference; without
+          it the screen is a form and the person has to triage it themselves. */}
+      {nextUp ? (
+        <section className="card next">
+          <span className="next-eyebrow">Next</span>
+          <strong className="next-title">{nextUp.title}</strong>
+          <p className="next-body">{nextUp.body}</p>
+          {nextUp.href ? (
+            <Link className="btn player" href={nextUp.href}>
+              {nextUp.action}
+            </Link>
+          ) : null}
+        </section>
+      ) : null}
+
       <section className="card">
         <div className="row between">
           <div>
@@ -168,39 +183,38 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
           </span>
         </div>
 
-        <div className="row" style={{ gap: 8, alignItems: 'flex-end', height: 84, marginTop: 4 }}>
+        <div className="row" style={{ gap: 8, alignItems: 'flex-end', marginTop: 4 }}>
           {weeks.map((w, i) => (
             <div key={i} style={{ flex: '1 1 0', textAlign: 'center' }}>
               <div
                 style={{
-                  height: Math.max(4, Math.round((w.sum / weekBest) * 68)),
-                  borderRadius: 7,
-                  background: i === weeks.length - 1 ? 'var(--player)' : 'var(--paper-sunk)',
-                  transition: 'height 0.5s cubic-bezier(.2,.8,.2,1)'
+                  height: 64,
+                  borderRadius: 8,
+                  background: 'var(--paper-sunk)',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  overflow: 'hidden'
                 }}
-                title={`${w.sum} points`}
-              />
+                title={`${w.sum} of 770 points`}
+              >
+                <div
+                  style={{
+                    width: '100%',
+                    height: `${Math.min(100, (w.sum / weekBest) * 100)}%`,
+                    background: i === weeks.length - 1 ? 'var(--player)' : 'var(--ink-faint)',
+                    // Past weeks recede so the current one leads.
+                    opacity: i === weeks.length - 1 ? 1 : 0.42,
+                    borderRadius: 8,
+                    transition: 'height 0.55s cubic-bezier(.2,.8,.2,1)'
+                  }}
+                />
+              </div>
               <div className="tiny faint" style={{ marginTop: 5 }}>{w.label}</div>
             </div>
           ))}
         </div>
         <p className="tiny faint">Points a week, last six weeks. A full week is 770.</p>
       </section>
-
-      {/* The one thing to do now. Everything below this is reference; without
-          it the screen is a form and the person has to triage it themselves. */}
-      {nextUp ? (
-        <section className="card next">
-          <span className="next-eyebrow">Next</span>
-          <strong className="next-title">{nextUp.title}</strong>
-          <p className="next-body">{nextUp.body}</p>
-          {nextUp.href ? (
-            <Link className="btn player" href={nextUp.href}>
-              {nextUp.action}
-            </Link>
-          ) : null}
-        </section>
-      ) : null}
 
       <Celebrate fire={dayComplete} once={`${duo.id}:${date}`} />
 
