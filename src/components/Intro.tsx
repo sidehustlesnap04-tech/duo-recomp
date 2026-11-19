@@ -33,7 +33,10 @@ export default function Intro({ force = false }: { force?: boolean }) {
     } catch {
       seen = false;
     }
-    if (!force && (seen || calm)) return;
+    if (!force && (seen || calm)) {
+      document.documentElement.removeAttribute('data-intro');
+      return;
+    }
 
     setMode('film');
 
@@ -69,6 +72,7 @@ export default function Intro({ force = false }: { force?: boolean }) {
       /* private browsing: it simply plays again next time */
     }
     setLeaving(true);
+    document.documentElement.removeAttribute('data-intro');
     setTimeout(() => setMode('off'), 420);
   }
 

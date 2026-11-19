@@ -796,3 +796,29 @@ body[data-kb='open'] .tabbar { transform: translateY(115%); }
   animation: none;
 }
 .intro[data-mode='film'] .intro-brand.shown { animation: brand-in 0.7s cubic-bezier(.2,1.2,.3,1) both; }
+
+/* Painted on the first frame, before React runs, so the app underneath is
+   never glimpsed before the opening starts. Removed once it ends. */
+html[data-intro='on'] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: var(--bg);
+}
+
+/* An installed app does not own the status bar area: iOS paints it, and the
+   film started underneath with a hard seam. Fading the film's top into that
+   colour turns the seam into a transition. */
+.intro[data-mode='film']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 96px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, var(--bg) 0%, rgba(238, 240, 246, 0.72) 42%, rgba(238, 240, 246, 0) 100%);
+}
+.intro-skip { z-index: 2; }
