@@ -822,3 +822,13 @@ html[data-intro='on'] body::before {
   background: linear-gradient(to bottom, var(--bg) 0%, rgba(238, 240, 246, 0.72) 42%, rgba(238, 240, 246, 0) 100%);
 }
 .intro-skip { z-index: 2; }
+
+/* A navigation row: icon, label, chevron. `.card` lays out in a column, so a
+   row inside one has to say so — otherwise the chevron drops under the text. */
+.nav-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: var(--s4);
+}
+.nav-row > :nth-child(2) { flex: 1 1 auto; }

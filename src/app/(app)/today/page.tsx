@@ -7,7 +7,7 @@ import Mascot, { poseFor } from '@/components/Mascot';
 import TickButton from '@/components/TickButton';
 import { Ring, Bar, Stat, Empty } from '@/components/ui';
 import InviteCard from '@/components/InviteCard';
-import { toggleMeal, toggleWorkout, saveHabits, toggleTask } from '@/lib/actions';
+import { toggleMeal, toggleWorkout, saveHabits, toggleTask, setGoalStatus } from '@/lib/actions';
 import { loadTasksForDay } from '@/lib/tasks';
 import Celebrate from '@/components/Celebrate';
 
@@ -18,11 +18,20 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
   const date = searchParams.d ?? todayISO();
   const supabase = createClient();
 
-  const [day, plan, { data: scores }, { data: allScores }] = await Promise.all([
+  const [day, plan, { data: scores }, { data: allScores }, { data: goals }] = await Promise.all([
     loadDay(me.user_id, duo.id, duo.starts_on, date),
     loadTasksForDay(duo.id, date),
     supabase.from('daily_scores').select('user_id, points, bonus').eq('duo_id', duo.id).eq('score_date', date),
-    supabase.from('daily_scores').select('user_id, points, bonus').eq('duo_id', duo.id)
+    supabase.from('daily_scores').select('user_id, points, bonus').eq('duo_id', duo.id),
+    // Open shared goals that are due by today. A goal made for today was
+    // only visible under More, which is not where anyone looks for it.
+    supabase
+      .from('shared_goals')
+      .select('id, title, target_date, status')
+      .eq('duo_id', duo.id)
+      .eq('status', 'open')
+      .lte('target_date', date)
+      .order('target_date')
   ]);
 
   const scoreFor = (id: string) => {
@@ -39,7 +48,8 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
   const mealsLeft = day.menu.filter((m) => !m.logged).length;
 
   const myTasks = plan.onDay.filter((x) => x.owner_id === null || x.owner_id === me.user_id);
-  const tasksLeft = myTasks.filter((x) => !plan.doneIds.has(x.id)).length;
+  const dueGoals = (goals ?? []) as { id: string; title: string; target_date: string; status: string }[];
+  const tasksLeft = myTasks.filter((x) => !plan.doneIds.has(x.id)).length + dueGoals.length;
 
   // Everything the day asked for, actually done. Not a score threshold: a
   // finished day, which is what deserves the noise.
@@ -142,9 +152,26 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
           </p>
         ) : null}
 
-        {plan.onDay.length === 0 ? (
+        {dueGoals.map((g) => (
+          <div key={g.id} className="tick-row" data-done="false">
+            <form action={async () => { 'use server'; await setGoalStatus(g.id, 'done'); }}>
+              <TickButton done={false} label={g.title} />
+            </form>
+            <div style={{ minWidth: 0 }}>
+              <div className="tick-title">{g.title}</div>
+              <div className="tick-meta">
+                {g.target_date < date ? `Shared goal, due ${g.target_date}` : 'Shared goal, due today'}
+              </div>
+            </div>
+            <span className="chip">Together</span>
+          </div>
+        ))}
+
+        {plan.onDay.length === 0 && dueGoals.length === 0 ? (
           <p className="small muted">Nothing planned for today. Add something from the calendar, or take the quiet.</p>
-        ) : (
+        ) : null}
+
+        {plan.onDay.length > 0 ? (
           plan.onDay.map((task) => {
             const done = plan.doneIds.has(task.id);
             const mine = task.owner_id === null || task.owner_id === me.user_id;
@@ -172,7 +199,7 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
               </div>
             );
           })
-        )}
+        ) : null}
 
         <Link href="/calendar" className="link-quiet">Open the calendar</Link>
       </section>

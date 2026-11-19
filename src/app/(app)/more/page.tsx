@@ -7,6 +7,7 @@ import { todayISO } from '@/lib/day';
 import { createClient } from '@/lib/supabase/server';
 import PushToggle from '@/components/PushToggle';
 import ReplayIntro from '@/components/ReplayIntro';
+import Icon3D, { type IconName } from '@/components/Icon3D';
 import { setNotificationPref } from '@/lib/actions';
 
 export const dynamic = 'force-dynamic';
@@ -17,10 +18,10 @@ const CATEGORIES = [
   { key: 'daily_reminder', title: 'Daily reminder', body: 'A nudge if the day is still unlogged by evening.' }
 ];
 
-const SECTIONS = [
-  { href: '/fitness', title: 'Fitness', body: 'Your plan, meal swaps, set logging and targets.' },
-  { href: '/progress', title: 'Progress', body: 'Weight, waist and body fat over the twelve weeks.' },
-  { href: '/together', title: 'Together', body: 'Shared goals, and what each of you lets the other see.' }
+const SECTIONS: { href: string; title: string; body: string; icon: IconName }[] = [
+  { href: '/fitness', title: 'Fitness', body: 'Your plan, meal swaps, set logging and targets.', icon: 'fitness' },
+  { href: '/progress', title: 'Progress', body: 'Weight, waist and body fat over the twelve weeks.', icon: 'progress' },
+  { href: '/together', title: 'Together', body: 'Shared goals, and what each of you lets the other see.', icon: 'together' }
 ];
 
 export default async function More() {
@@ -56,7 +57,13 @@ export default async function More() {
       </section>
 
       {SECTIONS.map((s) => (
-        <Link key={s.href} href={s.href} className="card row between" style={{ textDecoration: 'none', gap: 12 }}>
+        <Link
+          key={s.href}
+          href={s.href}
+          className="card nav-row"
+          style={{ textDecoration: 'none' }}
+        >
+          <Icon3D name={s.icon} size={42} />
           <span style={{ minWidth: 0 }}>
             <strong style={{ fontFamily: 'var(--font-display)', fontSize: 17 }}>{s.title}</strong>
             <span className="tiny muted" style={{ display: 'block' }}>{s.body}</span>
@@ -66,7 +73,10 @@ export default async function More() {
       ))}
 
       <section className="card">
-        <h2>Notifications</h2>
+        <div className="row" style={{ gap: 10 }}>
+          <Icon3D name="bell" size={34} />
+          <h2>Notifications</h2>
+        </div>
         <p className="small muted">
           Each phone asks separately, so turning this on here does not turn it on for{' '}
           {partner ? partner.display_name : 'your partner'}.
@@ -100,7 +110,10 @@ export default async function More() {
       </section>
 
       <section className="card">
-        <h2>Opening</h2>
+        <div className="row" style={{ gap: 10 }}>
+          <Icon3D name="play" size={34} />
+          <h2>Opening</h2>
+        </div>
         <p className="small muted">
           The opening plays once each time you launch the app. Replay it now if you want to show someone.
         </p>
@@ -108,7 +121,10 @@ export default async function More() {
       </section>
 
       <section className="card">
-        <h2>Account</h2>
+        <div className="row" style={{ gap: 10 }}>
+          <Icon3D name="account" size={34} />
+          <h2>Account</h2>
+        </div>
         <form action={signOut}>
           <button className="btn block" type="submit">Sign out</button>
         </form>
