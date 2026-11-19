@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Mascot from '@/components/Mascot';
+import { sendMessage } from '@/lib/actions';
 
 export type ChatMessage = {
   id: string;
@@ -99,11 +100,20 @@ export default function Chat({
     };
     setMessages((prev) => [...prev, temp]);
 
-    const { error } = await supabase.from('messages').insert({ duo_id: duoId, user_id: me.user_id, body });
-    if (error) {
+    // Through the server rather than straight to the database, so the same
+    // call that stores the message also notifies the other phone.
+    const res = await sendMessage(body);
+    if (!res.ok) {
       setMessages((prev) => prev.filter((m) => m.id !== temp.id));
       setDraft(body);
+      return;
     }
+    // If the socket echo has not landed yet, swap the optimistic row in place.
+    setMessages((prev) =>
+      prev.some((m) => m.id === res.message.id)
+        ? prev.filter((m) => m.id !== temp.id)
+        : prev.map((m) => (m.id === temp.id ? (res.message as ChatMessage) : m))
+    );
   }
 
   async function react(id: string, emoji: string) {

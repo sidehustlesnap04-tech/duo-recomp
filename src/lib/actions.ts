@@ -228,3 +228,93 @@ export async function setGoalStatus(goalId: string, status: string) {
   await supabase.from('shared_goals').update({ status }).eq('id', goalId);
   revalidatePath('/', 'layout');
 }
+
+/* ---- chat ------------------------------------------------------------- */
+
+/**
+ * Sends a chat message and notifies the partner.
+ *
+ * The insert goes through the caller's own session, so RLS still decides
+ * whether it is allowed; the notification is best-effort and never blocks
+ * the message.
+ */
+export async function sendMessage(body: string) {
+  const trimmed = body.trim().slice(0, 2000);
+  if (!trimmed) return { ok: false as const, error: 'Empty message' };
+
+  const { supabase, userId, duoId } = await me();
+  if (!duoId) return { ok: false as const, error: 'No challenge yet' };
+
+  const { data, error } = await supabase
+    .from('messages')
+    .insert({ duo_id: duoId, user_id: userId, body: trimmed })
+    .select('id, user_id, body, reaction, created_at')
+    .single();
+
+  if (error) return { ok: false as const, error: error.message };
+
+  const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', userId).maybeSingle();
+
+  const { notifyPartner } = await import('@/lib/push');
+  await notifyPartner('chat', {
+    title: profile?.display_name ?? 'Your partner',
+    body: trimmed.length > 120 ? trimmed.slice(0, 117) + '…' : trimmed,
+    url: '/chat',
+    tag: 'chat'
+  });
+
+  return { ok: true as const, message: data };
+}
+
+/* ---- notifications ---------------------------------------------------- */
+
+export async function savePushSubscription(sub: {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  userAgent?: string;
+}) {
+  const { supabase, userId } = await me();
+  const { error } = await supabase.from('push_subscriptions').upsert(
+    {
+      user_id: userId,
+      endpoint: sub.endpoint,
+      p256dh: sub.p256dh,
+      auth_key: sub.auth,
+      user_agent: sub.userAgent ?? null,
+      last_seen_at: new Date().toISOString(),
+      failure_count: 0
+    },
+    { onConflict: 'endpoint' }
+  );
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath('/more');
+  return { ok: true as const };
+}
+
+export async function removePushSubscription(endpoint: string) {
+  const { supabase } = await me();
+  await supabase.from('push_subscriptions').delete().eq('endpoint', endpoint);
+  revalidatePath('/more');
+  return { ok: true as const };
+}
+
+export async function setNotificationPref(category: string, enabled: boolean) {
+  const { supabase, userId } = await me();
+  const { error } = await supabase
+    .from('notification_prefs')
+    .upsert({ user_id: userId, category, enabled }, { onConflict: 'user_id,category' });
+  if (error) return { ok: false as const, error: error.message };
+  revalidatePath('/more');
+  return { ok: true as const };
+}
+
+/** Proves the whole chain on this device: server key, endpoint, worker. */
+export async function sendTestNotification() {
+  const { supabase, userId } = await me();
+  const { data: subs } = await supabase.from('push_subscriptions').select('endpoint, p256dh, auth_key').eq('user_id', userId);
+  if (!subs?.length) return { ok: false as const, error: 'This device is not subscribed yet.' };
+
+  const { testSelf } = await import('@/lib/push-self');
+  return testSelf(subs as { endpoint: string; p256dh: string; auth_key: string }[]);
+}
