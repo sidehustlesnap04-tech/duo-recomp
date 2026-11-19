@@ -77,6 +77,36 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
   const weekBest = Math.max(770, ...weeks.map((w) => w.sum));
 
   const dueGoals = (goals ?? []) as { id: string; title: string; target_date: string; status: string }[];
+
+  // The next thing worth doing, in the order the day actually runs: targets
+  // before anything can score, then the session, then food, then what the two
+  // of them planned. One answer, not a list — a list is the problem.
+  const nextUp: { title: string; body: string; href?: string; action?: string } | null = (() => {
+    if (!t) {
+      return {
+        title: 'Set your targets',
+        body: 'Nothing scores until your calories and protein come from your own measurements.',
+        href: '/fitness',
+        action: 'Set them now'
+      };
+    }
+    if (!workoutDone) {
+      return day.training
+        ? {
+            title: day.sessionName,
+            body: `${day.exercises.length} exercises. Tick it off below when it is done.`,
+            href: '/fitness',
+            action: 'Open the session'
+          }
+        : { title: 'Rest day', body: 'Tick it below. A respected rest day scores the same as training.' };
+    }
+    const meal = day.menu.find((m) => !m.logged);
+    if (meal) return { title: `Log ${meal.slot.n.toLowerCase()}`, body: meal.meal.n };
+    const task = myTasks.find((x) => !plan.doneIds.has(x.id));
+    if (task) return { title: task.title, body: task.due_time ? `Planned for ${task.due_time.slice(0, 5)}` : 'From your plan' };
+    if (dueGoals.length) return { title: dueGoals[0].title, body: 'Shared goal, due today' };
+    return null;
+  })();
   const tasksLeft = myTasks.filter((x) => !plan.doneIds.has(x.id)).length + dueGoals.length;
 
   // Everything the day asked for, actually done. Not a score threshold: a
@@ -156,6 +186,21 @@ export default async function Today({ searchParams }: { searchParams: { d?: stri
         </div>
         <p className="tiny faint">Points a week, last six weeks. A full week is 770.</p>
       </section>
+
+      {/* The one thing to do now. Everything below this is reference; without
+          it the screen is a form and the person has to triage it themselves. */}
+      {nextUp ? (
+        <section className="card next">
+          <span className="next-eyebrow">Next</span>
+          <strong className="next-title">{nextUp.title}</strong>
+          <p className="next-body">{nextUp.body}</p>
+          {nextUp.href ? (
+            <Link className="btn player" href={nextUp.href}>
+              {nextUp.action}
+            </Link>
+          ) : null}
+        </section>
+      ) : null}
 
       <Celebrate fire={dayComplete} once={`${duo.id}:${date}`} />
 

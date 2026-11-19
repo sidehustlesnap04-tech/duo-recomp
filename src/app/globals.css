@@ -12,7 +12,7 @@
 
   --ink: #22232e;
   --ink-soft: #62657a;
-  --ink-faint: #9b9fb4;
+  --ink-faint: #868ba1;
   --line: #e2e5ee;
 
   /* Player identity. */
@@ -28,8 +28,8 @@
   --powder: #d7e4f8;
   --butter: #f8e9bd;
 
-  --success: #3b8a65;
-  --warning: #9d6a15;
+  --success: #2d7354;
+  --warning: #7a5210;
   --danger: #bf4e3c;
 
   --r-sm: 12px;
@@ -75,21 +75,21 @@ h1, h2, h3 {
   letter-spacing: -0.015em;
   text-wrap: balance;
 }
-h1 { font-size: clamp(28px, 7vw, 34px); }
-h2 { font-size: 19px; letter-spacing: -0.01em; }
+h1 { font-size: clamp(30px, 8vw, 38px); }
+h2 { font-size: 20px; letter-spacing: -0.015em; }
 h3 { font-size: 16px; }
 p { margin: 0; }
 a { color: var(--ink); }
 
 .shell { max-width: 760px; margin: 0 auto; padding: 0 var(--s4) 112px; }
-.stack { display: flex; flex-direction: column; gap: var(--s4); }
+.stack { display: flex; flex-direction: column; gap: 18px; }
 .row { display: flex; gap: var(--s3); align-items: center; flex-wrap: wrap; }
 .between { justify-content: space-between; }
 .grow { flex: 1 1 0; min-width: 0; }
 .muted { color: var(--ink-soft); }
 .faint { color: var(--ink-faint); }
-.small { font-size: 13px; }
-.tiny { font-size: 12.5px; }
+.small { font-size: 13.5px; }
+.tiny { font-size: 12px; }
 .num { font-variant-numeric: tabular-nums; font-weight: 700; }
 
 /* ---- surfaces -------------------------------------------------------- */
@@ -891,3 +891,39 @@ html[data-intro='on'] body::before {
   box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.1), inset 0 -2px 4px rgba(0, 0, 0, 0.45);
 }
 [data-theme='dark'] .hero { box-shadow: var(--lift-2); }
+
+/* The next action. The only card allowed to shout: it carries the player's
+   own colour as a wash and a heavier title, so the eye lands here first and
+   the rest of the screen can stay quiet. */
+.card.next {
+  background: linear-gradient(150deg, var(--player-wash), var(--paper) 72%);
+  border-left: 3px solid var(--player);
+  gap: 6px;
+}
+.next-eyebrow {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--player);
+}
+.next-title {
+  font-family: var(--font-display);
+  font-size: 23px;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+}
+.next-body { font-size: 14px; color: var(--ink-soft); }
+.card.next .btn { margin-top: 6px; align-self: flex-start; }
+
+/* The dark .btn override above is later in the file and equal in weight, so
+   it was winning over .btn.player and .btn.done — the primary action lost
+   its colour in dark mode and read as another grey card. */
+[data-theme='dark'] .btn.player {
+  background: var(--player);
+  color: #ffffff;
+  border-color: var(--player);
+}
+[data-theme='dark'] .btn.done {
+  background: var(--player-surface);
+  color: var(--ink);
+  border-color: transparent;
+}
