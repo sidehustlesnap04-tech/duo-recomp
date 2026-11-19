@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Mascot from '@/components/Mascot';
 import { sendMessage } from '@/lib/actions';
+import KeyboardInset from '@/components/KeyboardInset';
 
 export type ChatMessage = {
   id: string;
@@ -83,6 +84,15 @@ export default function Chat({
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages.length]);
 
+  // The keyboard opening shrinks the viewport; follow the last message down.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const follow = () => endRef.current?.scrollIntoView({ block: 'end' });
+    vv.addEventListener('resize', follow);
+    return () => vv.removeEventListener('resize', follow);
+  }, []);
+
   async function send(e: React.FormEvent) {
     e.preventDefault();
     const body = draft.trim();
@@ -128,6 +138,7 @@ export default function Chat({
 
   return (
     <div className="chat">
+      <KeyboardInset />
       <div className="chat-log">
         {messages.length === 0 ? (
           <p className="small muted" style={{ textAlign: 'center', padding: '32px 0' }}>

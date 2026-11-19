@@ -344,8 +344,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ---- chat -------------------------------------------------------------
    The log scrolls; the composer sits just above the tab bar. */
 
-.chat { display: flex; flex-direction: column; min-height: calc(100dvh - 190px); }
-.chat-log { flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; padding-bottom: var(--s4); }
+.chat { display: flex; flex-direction: column; }
+
+/* Clears the pinned composer so the newest message is never hidden behind it. */
+.chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 86px;
+  min-height: calc(100dvh - 320px);
+}
 
 .chat-day {
   align-self: center;
@@ -431,17 +439,28 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .react-bar button:hover { background: var(--paper-sunk); transform: scale(1.22); }
 
 .composer {
-  position: sticky;
-  bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100% - 32px), 728px);
+  bottom: calc(var(--kb, 0px) + 78px);
+  z-index: 11;
   display: flex;
   gap: 8px;
   padding: 8px;
-  background: rgba(255, 255, 255, 0.84);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: saturate(1.6) blur(16px);
   -webkit-backdrop-filter: saturate(1.6) blur(16px);
   border-radius: 999px;
   box-shadow: var(--lift-2);
+  transition: bottom 0.18s ease-out;
 }
+
+/* With the keyboard up the tab bar is unreachable anyway, so it leaves and
+   the composer takes its place directly on top of the keyboard. */
+body[data-kb='open'] .composer { bottom: calc(var(--kb, 0px) + 8px); }
+body[data-kb='open'] .tabbar { transform: translateY(115%); }
+.tabbar { transition: transform 0.18s ease-out; }
 .composer input {
   flex: 1 1 auto;
   min-width: 0;
