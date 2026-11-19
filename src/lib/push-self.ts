@@ -30,10 +30,21 @@ export async function testSelf(subs: { endpoint: string; p256dh: string; auth_ke
   if (sent === 0) {
     const first = results.find((r) => r.status === 'rejected') as PromiseRejectedResult | undefined;
     const reason = first?.reason;
-    return {
-      ok: false as const,
-      error: `The push service rejected it${reason?.statusCode ? ` (${reason.statusCode})` : ''}.`
-    };
+    const code = reason?.statusCode;
+
+    // Say what to do, not just what happened.
+    const explain =
+      code === 403 || code === 401
+        ? 'The push service rejected the signature. Turn notifications off and on again on this device — the subscription was made with an older key.'
+        : code === 404 || code === 410
+          ? 'This device’s subscription has expired. Turn notifications off and on again.'
+          : code === 413
+            ? 'The notification was too large.'
+            : code
+              ? `The push service refused it (${code}).`
+              : 'The push service could not be reached.';
+
+    return { ok: false as const, error: explain };
   }
   return { ok: true as const, sent };
 }

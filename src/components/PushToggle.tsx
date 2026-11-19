@@ -79,11 +79,31 @@ export default function PushToggle({ vapidPublicKey }: { vapidPublicKey: string 
       const reg = await navigator.serviceWorker.register('/sw.js');
       await navigator.serviceWorker.ready;
 
-      const sub =
-        (await reg.pushManager.getSubscription()) ??
+      const wanted = b64ToBytes(vapidPublicKey);
+
+      // A subscription is bound to the key it was created with. If the server
+      // key has changed since — or an earlier attempt left one behind — reusing
+      // it means every delivery is signed by a key the push service will not
+      // accept, which surfaces as a 403 and nothing else. Replace it.
+      let sub = await reg.pushManager.getSubscription();
+      if (sub) {
+        const existing = sub.options?.applicationServerKey;
+        const same =
+          existing &&
+          new Uint8Array(existing).length === wanted.length &&
+          new Uint8Array(existing).every((b, i) => b === wanted[i]);
+        if (!same) {
+          await removePushSubscription(sub.endpoint);
+          await sub.unsubscribe();
+          sub = null;
+        }
+      }
+
+      sub =
+        sub ??
         (await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: b64ToBytes(vapidPublicKey)
+          applicationServerKey: wanted
         }));
 
       const json = sub.toJSON();
