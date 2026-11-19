@@ -367,10 +367,10 @@ body:has(.chat) .shell { padding-bottom: 0; }
   padding-bottom: 4px;
 }
 
-/* Rests a short conversation on the composer. `justify-content: flex-end`
-   would do the same until the log overflows, at which point the earliest
-   messages become unreachable. */
-.chat-log > :first-child { margin-top: auto; }
+/* A short conversation starts at the top, where it reads as a beginning
+   rather than as a screen that failed to fill. Once it outgrows the pane the
+   log scrolls, and the view follows the newest message to the bottom in the
+   usual way. */
 
 .chat-day {
   align-self: center;
