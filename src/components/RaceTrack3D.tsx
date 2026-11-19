@@ -121,7 +121,7 @@ export default function RaceTrack3D({ runners, dayPct }: { runners: Runner[]; da
                   width: `${r.pct}%`,
                   height: '100%',
                   borderRadius: 999,
-                  background: r.mascot === 'fox' ? 'var(--coral)' : 'var(--jade)'
+                  background: r.mascot === 'fox' ? 'var(--coral)' : 'var(--rose)'
                 }}
               />
             </div>

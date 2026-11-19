@@ -15,8 +15,8 @@ export const TRACK_LEN = 100;
 export const LANE_W = 19;
 const LANE_GAP = 3;
 
-const COLOUR = { fox: 0xe0705a, rabbit: 0x4e9e82 } as const;
-const LANE_TINT = { fox: 0xfbe6df, rabbit: 0xdcefe6 } as const;
+const COLOUR = { fox: 0xe0705a, rabbit: 0xd9548f } as const;
+const LANE_TINT = { fox: 0xfbe6df, rabbit: 0xfbe0ee } as const;
 
 const laneZ = (i: number, n: number) => (i - (n - 1) / 2) * (LANE_W + LANE_GAP);
 

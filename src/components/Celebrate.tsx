@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-const COLOURS = ['#e0705a', '#4e9e82', '#f4c84a', '#7f6fd6', '#58a7e8', '#f08fb0'];
+const COLOURS = ['#e0705a', '#d9548f', '#f4c84a', '#7f6fd6', '#58a7e8', '#f6c9bd'];
 
 /**
  * Throws confetti once per key. The key is the day, so finishing Tuesday

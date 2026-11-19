@@ -40,7 +40,7 @@ export default async function Together() {
               <strong>{label}</strong>
               <div className="tiny muted">{theirs(key) ? `${partner?.display_name} shares theirs` : partner ? `${partner.display_name} keeps theirs private` : 'no partner yet'}</div>
             </div>
-            <button className="btn" type="submit" style={mine(key) ? { background: 'var(--mint)', borderColor: 'var(--jade)' } : undefined}>
+            <button className="btn" type="submit" style={mine(key) ? { background: 'var(--player-surface)', borderColor: 'var(--player)' } : undefined}>
               {mine(key) ? 'Shared' : 'Private'}
             </button>
           </form>

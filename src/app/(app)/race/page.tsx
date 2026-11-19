@@ -83,7 +83,7 @@ export default async function Race() {
         />
         <div className="row between" style={{ padding: '0 var(--s4) var(--s4)' }}>
           {stats.map((x) => (
-            <span key={x.user_id} className="chip" style={{ background: x.mascot === 'fox' ? 'var(--peach)' : 'var(--mint)', color: 'var(--ink)' }}>
+            <span key={x.user_id} className="chip" style={{ background: x.mascot === 'fox' ? 'var(--peach)' : 'var(--blush)', color: 'var(--ink)' }}>
               {x.display_name} {x.total.toLocaleString()}
             </span>
           ))}

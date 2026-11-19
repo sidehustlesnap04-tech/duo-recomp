@@ -6,7 +6,7 @@
 export type Pose = 'idle' | 'run' | 'victory' | 'tired';
 
 const FOX = { fur: '#e08268', dark: '#c9654c', pale: '#f6e3da', ink: '#34343a', kit: '#f4e5b8' };
-const RABBIT = { fur: '#a99ae0', dark: '#8b7bc9', pale: '#efeaff', ink: '#34343a', kit: '#c8e3d5' };
+const RABBIT = { fur: '#eb8fb6', dark: '#cf6693', pale: '#fdeaf3', ink: '#34343a', kit: '#f7dbe8' };
 
 export default function Mascot({
   animal,

@@ -20,6 +20,8 @@
   --peach: #fadcd3;
   --jade: #4e9e82;
   --mint: #d2ebe0;
+  --rose: #d9548f;
+  --blush: #fbd9e8;
 
   /* Supporting pastels. */
   --lavender: #ded8f7;
@@ -49,7 +51,7 @@
   --player-wash: #fdf0ec;
 }
 [data-player='fox'] { --player: var(--coral); --player-surface: var(--peach); --player-wash: #fdf0ec; }
-[data-player='rabbit'] { --player: var(--jade); --player-surface: var(--mint); --player-wash: #eaf5f0; }
+[data-player='rabbit'] { --player: var(--rose); --player-surface: var(--blush); --player-wash: #fdeff5; }
 
 * { box-sizing: border-box; }
 html, body { padding: 0; margin: 0; }
