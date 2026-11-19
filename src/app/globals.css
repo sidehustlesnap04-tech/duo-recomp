@@ -345,20 +345,32 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ---- chat -------------------------------------------------------------
    The log scrolls; the composer sits just above the tab bar. */
 
-.chat { display: flex; flex-direction: column; }
+/* The chat screen owns the space between header and composer and scrolls
+   inside it. Letting it grow the page instead produced a dead scrollable
+   band above the messages and pushed the header off the top. */
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: calc(var(--vvh, 100dvh) - 198px);
+}
+body:has(.chat) .shell { padding-bottom: 0; }
 
-/* Clears the pinned composer so the newest message is never hidden behind it. */
 .chat-log {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  justify-content: flex-end;
-  padding-bottom: 86px;
-  /* Sized so the newest message lands just above the composer rather than
-     halfway up an empty screen. Tracks the live viewport, so it shrinks with
-     the keyboard instead of leaving a hole behind it. */
-  min-height: calc(var(--vvh, 100dvh) - 112px);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: 4px;
 }
+
+/* Rests a short conversation on the composer. `justify-content: flex-end`
+   would do the same until the log overflows, at which point the earliest
+   messages become unreachable. */
+.chat-log > :first-child { margin-top: auto; }
 
 .chat-day {
   align-self: center;
