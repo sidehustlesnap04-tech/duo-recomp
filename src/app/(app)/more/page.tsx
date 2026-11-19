@@ -102,7 +102,7 @@ export default async function More() {
       <section className="card">
         <h2>Opening</h2>
         <p className="small muted">
-          The animation plays once on this device. Replay it if you want to show someone.
+          The opening plays once each time you launch the app. Replay it now if you want to show someone.
         </p>
         <ReplayIntro />
       </section>

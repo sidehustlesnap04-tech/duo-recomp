@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import Mascot, { type Pose } from '@/components/Mascot';
 
+/* sessionStorage, not localStorage: it clears when the app is actually
+   closed, so the opening plays once per launch rather than once per device.
+   Moving between tabs inside a session does not replay it. */
 const SEEN = 'intro:v2';
 
 /** The rendered opening. Served from the generator's CDN rather than the
@@ -26,7 +29,7 @@ export default function Intro({ force = false }: { force?: boolean }) {
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let seen = false;
     try {
-      seen = localStorage.getItem(SEEN) === '1';
+      seen = sessionStorage.getItem(SEEN) === '1';
     } catch {
       seen = false;
     }
@@ -61,7 +64,7 @@ export default function Intro({ force = false }: { force?: boolean }) {
 
   function finish() {
     try {
-      localStorage.setItem(SEEN, '1');
+      sessionStorage.setItem(SEEN, '1');
     } catch {
       /* private browsing: it simply plays again next time */
     }
