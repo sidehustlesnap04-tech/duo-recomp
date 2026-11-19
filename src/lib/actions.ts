@@ -318,3 +318,18 @@ export async function sendTestNotification() {
   const { testSelf } = await import('@/lib/push-self');
   return testSelf(subs as { endpoint: string; p256dh: string; auth_key: string }[]);
 }
+
+/**
+ * Moves this person's read marker to now.
+ *
+ * Deliberately does not revalidate: it runs every time a message lands while
+ * the thread is open, and refreshing the layout underneath someone who is
+ * reading would be churn for no gain. The tab bar already clears its own
+ * badge on this screen, and the server's count is re-read on the next
+ * navigation.
+ */
+export async function markChatRead() {
+  const { supabase } = await me();
+  await supabase.rpc('mark_chat_read');
+  return { ok: true as const };
+}

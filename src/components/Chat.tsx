@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Mascot from '@/components/Mascot';
-import { sendMessage } from '@/lib/actions';
+import { sendMessage, markChatRead } from '@/lib/actions';
 import KeyboardInset from '@/components/KeyboardInset';
 
 export type ChatMessage = {
@@ -84,6 +84,12 @@ export default function Chat({
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages.length]);
+
+  // Reading the thread is what marks it read — on arrival, and again whenever
+  // something lands while it is open.
+  useEffect(() => {
+    void markChatRead();
   }, [messages.length]);
 
   // The keyboard opening shrinks the viewport; follow the last message down.

@@ -1,12 +1,15 @@
 import { redirect } from 'next/navigation';
 import TabBar from '@/components/TabBar';
 import LiveRefresh from '@/components/LiveRefresh';
+import { createClient } from '@/lib/supabase/server';
 import { requireSession } from '@/lib/duo';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, duo, me } = await requireSession();
   if (!user) redirect('/sign-in');
   if (!duo) redirect('/onboarding');
+
+  const { data: unread } = await createClient().rpc('unread_messages');
 
   return (
     <div data-player={me?.mascot ?? 'fox'}>
@@ -21,7 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <main className="stack">{children}</main>
       </div>
       <LiveRefresh duoId={duo.id} />
-      <TabBar />
+      <TabBar duoId={duo.id} userId={user.id} unread={unread} />
     </div>
   );
 }
