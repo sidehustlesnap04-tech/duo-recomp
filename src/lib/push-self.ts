@@ -32,6 +32,24 @@ export async function testSelf(subs: { endpoint: string; p256dh: string; auth_ke
     const reason = first?.reason;
     const code = reason?.statusCode;
 
+    // The push service states the cause in its body; Apple returns
+    // {"reason":"BadJwtToken"} and similar. Guessing at a bare status code
+    // has cost several rounds, so surface what it actually said.
+    let detail = '';
+    try {
+      const raw = typeof reason?.body === 'string' ? reason.body : JSON.stringify(reason?.body ?? '');
+      if (raw && raw !== '""') detail = raw.slice(0, 180);
+    } catch {
+      /* body not readable */
+    }
+    const host = (() => {
+      try {
+        return new URL(subs[0].endpoint).host;
+      } catch {
+        return 'unknown';
+      }
+    })();
+
     // Say what to do, not just what happened.
     const explain =
       code === 403 || code === 401
@@ -44,7 +62,7 @@ export async function testSelf(subs: { endpoint: string; p256dh: string; auth_ke
               ? `The push service refused it (${code}).`
               : 'The push service could not be reached.';
 
-    return { ok: false as const, error: explain };
+    return { ok: false as const, error: `${explain}${detail ? ` — service said: ${detail}` : ''} [${host}]` };
   }
   return { ok: true as const, sent };
 }
