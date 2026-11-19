@@ -1,0 +1,128 @@
+/* Duo Recomp design tokens. Pastels are surfaces and accents; text is always ink. */
+:root {
+  --ivory: #f7f3ec;
+  --paper: #ffffff;
+  --ink: #34343a;
+  --ink-soft: #6b6b75;
+  --ink-faint: #a4a4ae;
+  --line: #e7e0d6;
+
+  --lavender: #dcd2f5;
+  --peach: #f6c9bd;
+  --coral: #e08268;
+  --mint: #c8e3d5;
+  --jade: #5fa98a;
+  --powder: #d5e3f7;
+  --butter: #f4e5b8;
+
+  --success: #3f8f67;
+  --warning: #b5791f;
+  --danger: #c4553f;
+
+  --radius-control: 12px;
+  --radius-card: 20px;
+  --radius-sheet: 28px;
+  --shadow-card: 0 8px 24px -12px rgba(52, 52, 58, 0.18);
+
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px;
+
+  /* Set per player on a wrapper: the fox reads coral, the rabbit jade. */
+  --player: var(--coral);
+  --player-surface: var(--peach);
+}
+[data-player='rabbit'] { --player: var(--jade); --player-surface: var(--mint); }
+[data-player='fox'] { --player: var(--coral); --player-surface: var(--peach); }
+
+* { box-sizing: border-box; }
+html, body { padding: 0; margin: 0; }
+body {
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; margin: 0; line-height: 1.1; text-wrap: balance; }
+h1 { font-size: 30px; }
+h2 { font-size: 21px; }
+h3 { font-size: 17px; }
+p { margin: 0; }
+a { color: var(--ink); }
+
+.shell { max-width: 980px; margin: 0 auto; padding: 0 var(--s4) 104px; }
+.stack { display: flex; flex-direction: column; gap: var(--s4); }
+.row { display: flex; gap: var(--s3); align-items: center; flex-wrap: wrap; }
+.between { justify-content: space-between; }
+.grow { flex: 1 1 0; min-width: 0; }
+.muted { color: var(--ink-soft); }
+.small { font-size: 13px; }
+.tiny { font-size: 12px; }
+.num { font-variant-numeric: tabular-nums; font-weight: 700; }
+
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: var(--s4);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  min-width: 0;
+}
+.card.tinted { background: var(--player-surface); border-color: transparent; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+.btn {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: var(--radius-control);
+  padding: 12px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  transition: transform 0.12s ease-out, border-color 0.18s;
+}
+.btn:active { transform: scale(0.98); }
+.btn.primary { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
+.btn.player { background: var(--player); color: var(--paper); border-color: var(--player); }
+.btn.quiet { border-color: transparent; background: transparent; color: var(--ink-soft); }
+.btn.block { width: 100%; }
+.btn:disabled { opacity: 0.55; cursor: default; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+.field input, .field select {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  padding: 12px;
+  min-height: 44px;
+  width: 100%;
+}
+.field input:focus-visible, .btn:focus-visible { outline: 2px solid var(--player); outline-offset: 2px; }
+
+.notice { border-left: 3px solid var(--warning); background: var(--butter); padding: 12px 14px; border-radius: 0 12px 12px 0; font-size: 13px; }
+.notice.bad { border-color: var(--danger); background: #f7dcd6; }
+
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  background: rgba(247, 243, 236, 0.94);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line);
+  display: flex; justify-content: center; gap: 2px;
+  padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+}
+.tabbar a {
+  flex: 1 1 0; max-width: 150px; text-align: center; text-decoration: none;
+  color: var(--ink-faint); font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; padding: 10px 2px; border-radius: 12px;
+}
+.tabbar a[data-active='true'] { color: var(--ink); background: var(--player-surface); }
+
+.centre { min-height: 100dvh; display: grid; place-items: center; padding: var(--s4); }
+.centre .card { width: 100%; max-width: 420px; }
