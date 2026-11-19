@@ -4,6 +4,13 @@ import { todayISO } from '@/lib/day';
 import { dayNumber } from '@/lib/plan';
 import Mascot, { poseFor } from '@/components/Mascot';
 import { Stat } from '@/components/ui';
+import dynamicImport from 'next/dynamic';
+
+// Three.js only loads on this screen, and only in the browser.
+const RaceTrack3D = dynamicImport(() => import('@/components/RaceTrack3D'), {
+  ssr: false,
+  loading: () => <div style={{ height: 215 }} aria-busy="true" />
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -55,26 +62,32 @@ export default async function Race() {
         <span className="tiny muted">{n < 1 ? `starts ${duo.starts_on}` : `day ${Math.min(n, duo.length_days)} of ${duo.length_days}`}</span>
       </div>
 
-      <div className="card" style={{ padding: 0, overflow: 'hidden', background: 'linear-gradient(180deg, var(--powder), var(--paper) 62%)' }}>
-        <div style={{ position: 'relative', height: 300 }}>
-          {Array.from({ length: 13 }).map((_, w) => (
-            <div key={w} style={{ position: 'absolute', left: `${4 + (w / 12) * 92}%`, top: 24, bottom: 54, width: 1, background: w === 12 ? 'var(--ink)' : 'var(--line)' }}>
-              <span className="tiny" style={{ position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)', color: 'var(--ink-faint)', whiteSpace: 'nowrap' }}>
-                {w === 0 ? 'start' : w === 12 ? 'finish' : `w${w}`}
-              </span>
-            </div>
+      <div
+        className="card"
+        style={{
+          padding: 0,
+          overflow: 'hidden',
+          position: 'relative',
+          background: 'linear-gradient(180deg, var(--powder) 0%, var(--bg) 58%)'
+        }}
+      >
+        <RaceTrack3D
+          runners={stats.map((x) => ({
+            user_id: x.user_id,
+            display_name: x.display_name,
+            mascot: x.mascot,
+            total: x.total,
+            pct: x.pct
+          }))}
+          dayPct={Math.max(0, Math.min(100, (Math.max(0, n) / duo.length_days) * 100))}
+        />
+        <div className="row between" style={{ padding: '0 var(--s4) var(--s4)' }}>
+          {stats.map((x) => (
+            <span key={x.user_id} className="chip" style={{ background: x.mascot === 'fox' ? 'var(--peach)' : 'var(--mint)', color: 'var(--ink)' }}>
+              {x.display_name} {x.total.toLocaleString()}
+            </span>
           ))}
-          {stats.map((s, i) => (
-            <div key={s.user_id}>
-              <div style={{ position: 'absolute', left: '4%', right: '4%', top: 70 + i * 110, height: 2, background: 'var(--line)', borderRadius: 2 }} />
-              <div style={{ position: 'absolute', left: `${4 + s.pct * 0.92}%`, top: 70 + i * 110, transform: 'translate(-50%, -100%)', transition: 'left 1s cubic-bezier(.2,.8,.2,1)', textAlign: 'center' }}>
-                <span style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: s.mascot === 'fox' ? 'var(--coral)' : 'var(--jade)', color: '#fff', whiteSpace: 'nowrap' }}>
-                  {s.display_name} · {s.total}
-                </span>
-                <Mascot animal={s.mascot as 'fox' | 'rabbit'} pose={poseFor(s.today, true)} size={66} />
-              </div>
-            </div>
-          ))}
+          <span className="chip warn">today, week {Math.max(1, Math.ceil(Math.max(1, n) / 7))}</span>
         </div>
       </div>
 
