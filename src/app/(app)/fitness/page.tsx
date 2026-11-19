@@ -1,4 +1,4 @@
-import { loadSession } from '@/lib/duo';
+import { requireSession } from '@/lib/duo';
 import { loadDay, todayISO } from '@/lib/day';
 import { MEALS, SLOTS, SPLITS, SESSION_NAMES, ING, suggest } from '@/lib/plan';
 import { swapMeal, logSet, addFood, removeFood, saveTargets, setSession } from '@/lib/actions';
@@ -7,7 +7,7 @@ import { Empty } from '@/components/ui';
 export const dynamic = 'force-dynamic';
 
 export default async function Fitness({ searchParams }: { searchParams: { d?: string } }) {
-  const { duo, me } = await loadSession();
+  const { duo, me } = await requireSession();
   const date = searchParams.d ?? todayISO();
   const day = await loadDay(me!.user_id, duo.id, duo.starts_on, date);
   const t = day.targets;

@@ -126,3 +126,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 .centre { min-height: 100dvh; display: grid; place-items: center; padding: var(--s4); }
 .centre .card { width: 100%; max-width: 420px; }
+
+/* Visually hidden, still read aloud by screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

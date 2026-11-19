@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { loadSession } from '@/lib/duo';
+import { requireSession } from '@/lib/duo';
 import { todayISO } from '@/lib/day';
 import { dayNumber } from '@/lib/plan';
 import Mascot, { poseFor } from '@/components/Mascot';
@@ -14,7 +14,7 @@ const REWARDS = [
 ];
 
 export default async function Race() {
-  const { duo, members, me } = await loadSession();
+  const { duo, members, me } = await requireSession();
   const supabase = createClient();
   const today = todayISO();
   const { data: rows } = await supabase

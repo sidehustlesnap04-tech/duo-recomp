@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation';
 import TabBar from '@/components/TabBar';
-import { loadSession } from '@/lib/duo';
+import { requireSession } from '@/lib/duo';
 import { signOut } from '@/app/auth/actions';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, duo, me } = await loadSession();
+  const { user, duo, me } = await requireSession();
   if (!user) redirect('/sign-in');
   if (!duo) redirect('/onboarding');
 

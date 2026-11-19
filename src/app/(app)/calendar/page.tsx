@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { loadSession } from '@/lib/duo';
+import { requireSession } from '@/lib/duo';
 import { todayISO } from '@/lib/day';
 import { addTask, toggleTask, deleteTask } from '@/lib/actions';
 import TickButton from '@/components/TickButton';
@@ -22,7 +22,7 @@ function occursOn(t: any, date: string) {
 }
 
 export default async function Calendar({ searchParams }: { searchParams: { d?: string } }) {
-  const { duo, members, me } = await loadSession();
+  const { duo, members, me } = await requireSession();
   const date = searchParams.d ?? todayISO();
   const supabase = createClient();
 
@@ -37,28 +37,100 @@ export default async function Calendar({ searchParams }: { searchParams: { d?: s
   const overdue = (tasks ?? []).filter(
     (t) => t.kind === 'task' && t.recurrence === 'none' && t.due_date < date && !doneIds.has(t.id)
   );
-  const week = Array.from({ length: 7 }).map((_, i) => {
-    const d = new Date(new Date(date + 'T12:00:00').getTime() + (i - 3) * 86400000).toISOString().slice(0, 10);
-    return { d, count: (tasks ?? []).filter((t) => occursOn(t, d)).length };
-  });
+  // --- month grid -------------------------------------------------------
+  const iso = (y: number, m: number, d: number) => new Date(Date.UTC(y, m, d, 12)).toISOString().slice(0, 10);
+  const sel = new Date(date + 'T12:00:00');
+  const year = sel.getFullYear();
+  const month = sel.getMonth();
+  const daysInMonth = new Date(Date.UTC(year, month + 1, 0, 12)).getUTCDate();
+  const lead = (new Date(Date.UTC(year, month, 1, 12)).getUTCDay() + 6) % 7; // Monday first
+  const today = todayISO();
+
+  const cells: ({ d: string; day: number; count: number } | null)[] = [
+    ...Array.from({ length: lead }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => {
+      const d = iso(year, month, i + 1);
+      return { d, day: i + 1, count: (tasks ?? []).filter((t) => occursOn(t, d)).length };
+    })
+  ];
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const monthLabel = sel.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  const prevMonth = iso(year, month - 1, 1);
+  const nextMonth = iso(year, month + 1, 1);
+  const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  // The challenge window, so days inside it read differently from days outside.
+  const endsOn = iso(
+    new Date(duo.starts_on + 'T12:00:00').getUTCFullYear(),
+    new Date(duo.starts_on + 'T12:00:00').getUTCMonth(),
+    new Date(duo.starts_on + 'T12:00:00').getUTCDate() + duo.length_days - 1
+  );
 
   return (
     <>
       <h1>Calendar</h1>
 
       <div className="card">
-        <div className="row between">
-          {week.map((w) => (
-            <a key={w.d} href={`/calendar?d=${w.d}`} style={{
-              textDecoration: 'none', textAlign: 'center', flex: 1, padding: '8px 2px', borderRadius: 12,
-              background: w.d === date ? 'var(--player-surface)' : 'transparent'
-            }}>
-              <div className="tiny muted">{new Date(w.d + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short' })}</div>
-              <div className="num">{new Date(w.d + 'T12:00:00').getDate()}</div>
-              <div className="tiny muted">{w.count || ''}</div>
-            </a>
-          ))}
+        <div className="row between" style={{ marginBottom: 10 }}>
+          <a className="btn quiet tiny" href={`/calendar?d=${prevMonth}`} aria-label="Previous month">‹</a>
+          <strong style={{ fontFamily: 'var(--font-display)', fontSize: 16 }}>{monthLabel}</strong>
+          <a className="btn quiet tiny" href={`/calendar?d=${nextMonth}`} aria-label="Next month">›</a>
         </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+          {WEEKDAYS.map((w) => (
+            <div key={w} className="tiny muted" style={{ textAlign: 'center', paddingBottom: 4 }}>
+              {w.slice(0, 1)}
+            </div>
+          ))}
+
+          {cells.map((c, i) => {
+            if (!c) return <div key={`pad-${i}`} />;
+            const selected = c.d === date;
+            const isToday = c.d === today;
+            const inChallenge = c.d >= duo.starts_on && c.d <= endsOn;
+            return (
+              <a
+                key={c.d}
+                href={`/calendar?d=${c.d}`}
+                aria-current={selected ? 'date' : undefined}
+                style={{
+                  textDecoration: 'none',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 2,
+                  aspectRatio: '1 / 1',
+                  borderRadius: 12,
+                  background: selected ? 'var(--player-surface)' : inChallenge ? 'var(--ivory)' : 'transparent',
+                  border: isToday && !selected ? '1.5px solid var(--player)' : '1.5px solid transparent',
+                  color: inChallenge || selected ? 'var(--ink)' : 'var(--ink-faint)',
+                  fontWeight: selected || isToday ? 700 : 400
+                }}
+              >
+                <span style={{ fontSize: 14, lineHeight: 1 }}>{c.day}</span>
+                <span
+                  aria-hidden
+                  style={{
+                    width: 4,
+                    height: 4,
+                    borderRadius: 999,
+                    background: c.count ? 'var(--player)' : 'transparent'
+                  }}
+                />
+                {c.count > 0 ? <span className="sr-only">{c.count} planned</span> : null}
+              </a>
+            );
+          })}
+        </div>
+
+        {date !== today ? (
+          <a className="btn quiet tiny block" href={`/calendar?d=${today}`} style={{ marginTop: 10 }}>
+            Back to today
+          </a>
+        ) : null}
       </div>
 
       {overdue.length ? (

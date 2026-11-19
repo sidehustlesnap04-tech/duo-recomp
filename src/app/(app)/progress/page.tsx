@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { loadSession } from '@/lib/duo';
+import { requireSession } from '@/lib/duo';
 import { Empty, Stat } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
@@ -42,7 +42,7 @@ function Line({ series, label }: { series: { name: string; colour: string; point
 }
 
 export default async function Progress() {
-  const { duo, members, me } = await loadSession();
+  const { duo, members, me } = await requireSession();
   const supabase = createClient();
   const [{ data: scores }, { data: shared }, { data: mineBody }, { data: prefs }] = await Promise.all([
     supabase.from('daily_scores').select('*').eq('duo_id', duo.id).order('score_date'),

@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { loadSession } from '@/lib/duo';
+import { requireSession } from '@/lib/duo';
 import { setSharing, addGoal, setGoalStatus } from '@/lib/actions';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +11,7 @@ const METRICS: [string, string][] = [
 ];
 
 export default async function Together() {
-  const { duo, members, me } = await loadSession();
+  const { duo, members, me } = await requireSession();
   const supabase = createClient();
   const [{ data: prefs }, { data: goals }] = await Promise.all([
     supabase.from('sharing_prefs').select('*').eq('duo_id', duo.id),

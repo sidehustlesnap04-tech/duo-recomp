@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { loadSession } from '@/lib/duo';
+import { requireSession } from '@/lib/duo';
 import { loadDay, todayISO } from '@/lib/day';
 import { dayNumber } from '@/lib/plan';
 import Mascot, { poseFor } from '@/components/Mascot';
@@ -12,7 +12,7 @@ import { toggleMeal, toggleWorkout, saveHabits } from '@/lib/actions';
 export const dynamic = 'force-dynamic';
 
 export default async function Today({ searchParams }: { searchParams: { d?: string } }) {
-  const { duo, members, me } = await loadSession();
+  const { duo, members, me } = await requireSession();
   const date = searchParams.d ?? todayISO();
   const supabase = createClient();
 
