@@ -769,3 +769,28 @@ body[data-kb='open'] .tabbar { transform: translateY(115%); }
   from { transform: scaleX(-1) translate(-4px, 0); }
   to   { transform: scaleX(-1) translate(-54vw, 54px); }
 }
+
+/* The rendered opening fills the screen; the brand resolves over its last
+   beat. The drawn version keeps its own staging below. */
+.intro[data-mode='film'] { gap: 0; padding: 0; }
+
+.intro-film {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--bg);
+}
+
+.intro[data-mode='film'] .intro-brand {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  opacity: 0;
+  padding: 18px 16px 22px;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.93) 55%, transparent);
+  animation: none;
+}
+.intro[data-mode='film'] .intro-brand.shown { animation: brand-in 0.7s cubic-bezier(.2,1.2,.3,1) both; }
