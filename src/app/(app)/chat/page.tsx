@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { requireSession } from '@/lib/duo';
 import Chat, { type ChatMessage } from '@/components/Chat';
+import { dayNumber } from '@/lib/plan';
+import { todayISO } from '@/lib/day';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +27,7 @@ export default async function ChatPage() {
       me={{ user_id: me.user_id, display_name: me.display_name, mascot: me.mascot }}
       partner={partner ? { user_id: partner.user_id, display_name: partner.display_name, mascot: partner.mascot } : null}
       initial={initial}
+      note={`Day ${Math.max(1, Math.min(dayNumber(duo.starts_on, todayISO()), duo.length_days))} of ${duo.length_days}`}
     />
   );
 }

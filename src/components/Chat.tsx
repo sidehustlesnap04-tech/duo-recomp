@@ -36,12 +36,14 @@ export default function Chat({
   duoId,
   me,
   partner,
-  initial
+  initial,
+  note
 }: {
   duoId: string;
   me: Who;
   partner: Who | null;
   initial: ChatMessage[];
+  note: string;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>(initial);
   const [draft, setDraft] = useState('');
@@ -139,7 +141,28 @@ export default function Chat({
   return (
     <div className="chat">
       <KeyboardInset />
+
+      {partner ? (
+        <div className="chat-head scene">
+          <div>
+            <div className="float">
+              <Mascot animal={partner.mascot as 'fox' | 'rabbit'} pose="idle" size={44} />
+            </div>
+            <span className="cast-shadow" style={{ width: 26 }} aria-hidden />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <strong style={{ fontFamily: 'var(--font-display)', fontSize: 17 }}>{partner.display_name}</strong>
+            <div className="tiny muted">{note}</div>
+          </div>
+        </div>
+      ) : null}
       <div className="chat-log">
+        {partner && messages.length > 0 && messages.length <= 6 ? (
+          <p className="chat-opener">
+            Just the two of you. Nobody else can read this.
+          </p>
+        ) : null}
+
         {messages.length === 0 ? (
           <p className="small muted" style={{ textAlign: 'center', padding: '32px 0' }}>
             {partner ? `Nothing here yet. Say something to ${partner.display_name}.` : 'Your partner has not joined yet.'}
